@@ -73,7 +73,7 @@ def simuliraj_iteraciju(seed):
     rotacije = [(1, 2, 3), (3, 1, 2), (2, 3, 1)]
 
     for rotacija in rotacije:
-        agenti = [PimcBot(seat, f"PBot {bid}") if bid == 1 else NapredniBot(seat, f"Bot {bid}") for seat, bid in enumerate(rotacija)]
+        agenti = [NapredniBot(seat, f"PBot {bid}") if bid == 1 else NapredniBot(seat, f"Bot {bid}") for seat, bid in enumerate(rotacija)]
         seat_to_bot = {s: b for s, b in enumerate(rotacija)}
         
         engine = GameLoop(agents=agenti, seed=seed)
@@ -160,4 +160,4 @@ def _ispisi_rezultate(stats, odigrane_runde):
     print("="*105)
 
 if __name__ == "__main__":
-    pokreni_simulaciju(5)
+    pokreni_simulaciju(1500)

@@ -63,7 +63,17 @@ class GameLoop:
         
         igraci_koji_su_rekli_igra = []
 
-        while len(self.state.aktivni_u_licitaciji) > 1:
+        # --- ISPRAVLJENA PETLJA ---
+        while True:
+            # 1. Ako su svi odustali, prekidamo (ide se u Refu)
+            if len(self.state.aktivni_u_licitaciji) == 0:
+                break
+                
+            # 2. Ako je ostao samo 1 aktivan igrač, prekidamo SAMO ako je neko već nešto zvao.
+            # Ako niko ništa nije zvao (poslednja_akcija je None), taj poslednji mora da se izjasni!
+            if len(self.state.aktivni_u_licitaciji) == 1 and self.state.poslednja_akcija is not None:
+                break
+
             # Prekid licitacije ako imamo izjednačenje u "Igra" (svi preostali su rekli Igra)
             svi_govorili = all(p in self.state.igraci_imali_potez_licitacije for p in self.state.aktivni_u_licitaciji)
             svi_rekli_igra = all(p in igraci_koji_su_rekli_igra for p in self.state.aktivni_u_licitaciji)
@@ -74,16 +84,11 @@ class GameLoop:
             agent = self.agents[trenutni]
             
             # --- AUTO-IZBACIVANJE ---
-            # Ako je neko zvao specijalnu igru (Igra, Betl, Sans), oni koji su već 
-            # imali svoj potez a nisu je zvali, automatski ispadaju. Nema "Dalje".
             if self.state.specijalna_igra_nivo > 0:
                 if trenutni in self.state.igraci_imali_potez_licitacije:
                     if self.state.specijalna_igra_nivo > 1 or trenutni not in igraci_koji_su_rekli_igra:
                         self.state.aktivni_u_licitaciji.remove(trenutni)
-                        if len(self.state.aktivni_u_licitaciji) <= 1:
-                            break
-                        self._sledeci_licitant()
-                        continue
+                        continue # Sledeca iteracija ce ga izbaciti ili zatvoriti petlju
 
             moguci = ["dalje"]
             nivo = self.state.trenutna_licitacija_broj
@@ -506,7 +511,8 @@ class GameLoop:
             "stihovi": list(self.trenutni_stihovi),
             "pocetne_ruke": self.state.pocetne_ruke, "pocetni_talon": self.state.pocetni_talon,
             "scoring_snapshot": self.scoring.get_stanje(),
-            "odigrano_pod_refom": igra_se_pod_refom # Da GUI zna koga da precrta!
+            "odigrano_pod_refom": igra_se_pod_refom,
+            "istorija_licitacije": list(self.state.istorija_licitacije)
         }
         self.zavrsene_runde.append(runda_info)
         

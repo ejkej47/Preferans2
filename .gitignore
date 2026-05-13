@@ -19,3 +19,7 @@ Thumbs.db
 
 # UI/Assets (Opciono)
 ui/assets
+
+# ML
+*.pkl
+*.csv
