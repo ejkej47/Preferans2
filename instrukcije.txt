@@ -1,0 +1,117 @@
+KNOWLEDGE BASE: PREFERANS AI (NAPREDNI BOT) - PRAVILA I LOGIKA
+
+Ovaj dokument sadrži celokupnu logiku donošenja odluka koju koristi NapredniBot u igri Preferans.
+Pravila su podeljena hronološki, po fazama jedne runde.
+
+--- 1. OSNOVE I VREDNOVANJE KARATA ---
+
+Hijerarhija: 7 < 8 < 9 < 10 < J < Q < K < A
+
+Nivoi licitacije (1-7): Pik(2), Karo(3), Herc(4), Tref(5), Betl(6), Sans(7). Brojevi kod boja znače samo prioritet prizivanja, ne i snagu ruke!
+
+Kafanski štihovi (opšta snaga): As = 1 štih. Kralj (ako ih je 2+ u boji) = 1 štih. Dama (ako ih je 3+ u boji) = 1 štih.
+
+Sigurni štihovi sa strane: Ovo su ISKLJUČIVO Asovi u bojama koje nisu adut.
+
+--- 2. FAZA LICITACIJE (odluci_licitaciju) ---
+
+Pravilo limita: Bot nikada ne licitira preko vrednosti svoje najduže boje. (Npr. za dug Karo, staje na 3).
+
+STEPENASTI USLOVI ZA BOJU (Dužina Aduta diktira hrabrost):
+
+6+ aduta (Odlično): Traži se samo 2+ opšta štiha ukupno.
+
+5 aduta (Super): Traži se 3+ opšta štiha ukupno.
+
+4 aduta (Knap): Traži se 4+ opštih štihova I MINIMUM 1 KEC u ruci! (Ne sme se oslanjati samo na treće dame).
+
+3 aduta (Ekstremno): Traži se 5+ opštih štihova I MINIMUM 2 KECA u ruci.
+
+Uslov za Sans (7): 6+ opštih štihova uz minimum 2 Keca, nijedna boja ne sme biti duža od 4 karte.
+
+Uslov za Igru iz ruke: 7+ opštih štihova uz minimum 3 Keca.
+
+Ako nema ništa od navedenog: "Dalje".
+
+--- 3. ŠKARTIRANJE I ADUT (skartiraj, izaberi_aduta) ---
+
+Čuvanje (Ometači): Nikada ne baca karte iz najduže boje, Asove, druge Kraljeve i treće Dame.
+
+Škartiranje: Bira dve karte najmanje vrednosti iz najkraćih "ružnih" boja (singlovi).
+
+Adut: Po pravilu bira boju koje ima najviše u ruci NAKON škarta.
+
+--- 4. PRATNJA, ZOVEM I KONTRA ---
+Ova faza je isključivo matematička. Procenjuje snagu na osnovu BROJA ADUTA, ADUTSKOG KACA i ASOVA SA STRANE.
+
+SCENARIO A: Oba pratioca su u igri (Standardna procena "Dolazim")
+
+4+ aduta: Uvek prati.
+
+3 aduta: Prati ako ima jakog aduta (A, K, Q) ili bar 1 Keca sa strane, ili 1 opšti štih.
+
+2 aduta: Prati ako ima adutskog Asa, ili adutskog Kralja + 1 Keca sa strane, ili 2 Keca sa strane.
+
+1 adut: Prati ako ima adutskog Asa + 1 Keca sa strane, ili 2 Keca sa strane.
+
+0 aduta: Prati samo ako ima 3 Keca sa strane.
+
+SCENARIO B: Prvi pratilac je pobegao (Pravila za drugog pratioca)
+
+PRAVILO IGRE: Drugi pratilac uvek ima pravo da igra sam ("Dođem", gde mora uzeti 4 štiha), da natera prvog da se vrati ("Zovem", gde zajedno skupljaju 4 štiha), ili da odustane ("Dalje").
+
+STRATEGIJA BOTA - DOĐEM (Igra sam): Bira ovu opciju isključivo kada mu ne treba pomoć! Mora da ima 4+ aduta ILI izuzetno jake karte (4+ opštih štihova uz minimum 2 aduta).
+
+STRATEGIJA BOTA - ZOVEM (Na boju): Bira ovo kada nema snage da sam prođe, ali ima bazu: 3 aduta + (1 Kec sa strane ILI Adutski Kec) ILI 2 aduta + (2 Keca sa strane ILI Adutski Kec + 1 Kec sa strane) ILI 1 adut + (2 Keca sa strane i ukupno 3 štiha).
+
+STRATEGIJA BOTA - ZOVEM (Na Sans/Betl): Zateže uslov! Mora da ima striktno 2 čista Aca ili 4+ opštih štihova. "Treća Dama" se ovde ne priznaje za zvanje.
+
+Ako nema ništa od ovoga, ODUSTAJE i on (Nosilac tada automatski prolazi sa fiktivnih 6 štihova).
+
+KONTRA:
+
+Ekstremno oštra! Gotovo siguran pad Nosioca.
+
+5+ aduta uz 1 Keca sa strane -> Kontra.
+
+4+ aduta uz 2 Keca sa strane -> Kontra.
+
+--- 5. IGRANJE KARATA (odigraj_kartu) ---
+
+Gvozdena pravila Preferansa: Mora boja -> Ako nema, mora adut -> Ako nema ni to, baca škart.
+
+Master Card (Gospodar Boje): Bot interno prati koje su karte pale. Ako padne As, njegov Kralj postaje apsolutni Gospodar i tretira se kao As.
+
+SCENARIO A: Bot otvara štih (igra prvi na prazan sto)
+
+Kao Nosilac (Velemajstorska logika):
+
+Prati preostale adute (ukupno ih je 8 u igri).
+
+Ako protivnici imaju adute, a neko od njih drži JAČEG aduta od botovog (npr. bot ima Žandara, a Kralj nije pao) -> Bot PRESTAJE da vuče adute! Igra svoju najdužu običnu boju kako bi naterao protivnika da tog Kralja potroši na sečenje.
+
+Ako su botovi aduti najjači -> Vuče ih da očisti pratioce.
+
+Ako protivnici nemaju više aduta -> Prestaje da ih vuče i napada običnim Gospodarima.
+
+Kao Pratilac:
+
+Igra Gospodara (najjaču kartu u igri) ako ga ima.
+
+Ako igra "Kroz nosioca" (Nosilac igra posle njega): Gađa svoju NAJDUŽU boju malom kartom. Cilj: iznuditi nosiocu aduta (sečenje).
+
+Ako igra "Ispod nosioca": Igra defanzivno najmanjom kartom da ne namešta štih.
+
+SCENARIO B: Partner (drugi pratilac) trenutno nosi štih
+
+Ako je Nosilac već odigrao kartu i gubi: Bot baca najmanju moguću kartu (đubre) jer je štih bezbedan.
+
+Ako Nosilac tek treba da igra (bot igra pre Nosioca): Bot proverava da li je partnerova karta Apsolutni Gospodar. Ako nije, bot POKRIVA štih svojom najjačom kartom (min 10) da Nosilac ne bi jeftino uzeo štih sa nekom devetkom.
+
+SCENARIO C: Nosilac trenutno nosi štih
+
+Bot simulira poteze da vidi može li preuzeti štih od nosioca.
+
+Ako MOŽE preoteti: Uvek baca NAJSLABIJU kartu kojom pobeđuje (ne baca Asa ako nosi sa Kraljem).
+
+Ako NE MOŽE preoteti: Bira najmanju kartu koja ne kvari njegove "Kafanske štihove" (čuva Kx i Qxx) u onim bojama u kojima ih ima.

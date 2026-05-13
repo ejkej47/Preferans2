@@ -1,0 +1,21 @@
+# Python bytecode i keš
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Okruženje (Virtual Environments)
+venv/
+env/
+.env
+
+# IDE specifični fajlovi (VS Code, PyCharm)
+.vscode/
+.idea/
+*.swp
+
+# Sistemski fajlovi
+.DS_Store
+Thumbs.db
+
+# UI/Assets (Opciono)
+ui/assets
