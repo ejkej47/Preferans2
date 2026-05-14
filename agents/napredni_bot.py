@@ -462,3 +462,9 @@ class NapredniBot(BaseAgent):
                 return False
                 
         return True
+    
+    def potvrdi_talon(self, state):
+        return True
+    
+    def ceka_novu_ruku(self, state):
+        return True # Bot ne čeka, on je spreman odmah

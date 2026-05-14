@@ -23,6 +23,6 @@ class UIComponents:
         pygame.draw.rect(screen, CRNA, rect, 1, border_radius=4)
 
         txt = FONT_SMALL.render(tekst, True, CRNA)
-        screen.blit(txt, (x + 10, y + (h - txt.get_height()) // 2))
+        screen.blit(txt, (x + w // 2 - txt.get_width() // 2, y + (h - txt.get_height()) // 2))
 
         return rect

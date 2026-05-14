@@ -61,7 +61,7 @@ class DisplayHandler:
         # ISPRAVLJENO: Koristimo self.gui.state
         stanje = self.gui.state.faza
         pobednik_id = self.gui.state.pobednik_licitacije
-        adut = self.gui.state.adut if self.gui.state.adut else "Igru"
+        adut = self.gui.state.adut if self.gui.state.adut else ""
 
         for pid, (x, y) in pozicije.items():
             labela = ""
@@ -103,11 +103,11 @@ class DisplayHandler:
                         boja_pozadine = (40, 100, 220) # Plava
                         boja_teksta = BELA
                     elif odluka == "dodjem" or odluka == "zovem":
-                        labela = "Pratim" if odluka == "dodjem" else "Zovem"
+                        labela = "Dodjem" if odluka == "dodjem" else "Zovem"
                         boja_pozadine = (40, 150, 40) if odluka == "dodjem" else (40, 100, 220)
                         boja_teksta = BELA
                     elif odluka == "ne_dodjem":
-                        labela = "Prolazim"
+                        labela = "Ne dodjem"
                         boja_pozadine = (180, 40, 40) # Crvena
                         boja_teksta = BELA
                     else:
@@ -262,42 +262,40 @@ class DisplayHandler:
         if self.gui.state is None:
             return
             
-        # NE crtamo karte ovde SAMO ako trenutno mi vršimo škartiranje 
-        # (jer se tada karte crtaju unutar same metode nacrtaj_skartiranje)
         if self.gui.tip_unosa == "skart":
             return
             
         self.gui.rects = []
         mis_pos = self.gui.mis_pozicija
         
-        # Proveri validne poteze ako smo u igri i ako smo mi na potezu
+        # ISPRAVKA: Na kraju runde ruka je prazna, koristimo pocetne_ruke da vidimo šta smo imali
+        ruka_za_prikaz = self.gui.state.pocetne_ruke[0] if self.gui.state.faza == "KRAJ" else self.gui.state.ruke[0]
+        
         validni = []
         if self.gui.state.faza == "IGRA" and self.gui.state.na_potezu == 0:
             prva = self.gui.state.karte_na_stolu[0][1] if self.gui.state.karte_na_stolu else None
             from engine.game_rules import GameRules
-            validni = GameRules.validni_potezi(self.gui.state.ruke[0], prva, self.gui.state.adut)
+            validni = GameRules.validni_potezi(ruka_za_prikaz, prva, self.gui.state.adut)
             
-        # Računamo pozicije
-        n = len(self.gui.state.ruke[0])
+        n = len(ruka_za_prikaz)
+        if n == 0: return # Bezbednosna provera
+
         KARTA_W = 100
         razmak = 45
         ukupna_sirina = (n - 1) * razmak + KARTA_W
         start_x = (SCREEN_W - ukupna_sirina) // 2
 
-        # 1. Prvo tražimo kartu na kojoj je miš (od nazad, zbog preklapanja)
         hoverovana_karta = None
         for i in reversed(range(n)):
-            karta = self.gui.state.ruke[0][i]
+            karta = ruka_za_prikaz[i]
             rect = pygame.Rect(start_x + i * razmak, 540, 100, 140)
             if rect.collidepoint(mis_pos):
                 hoverovana_karta = karta
                 break
 
-        # 2. Crtamo sve karte
-        for i, karta in enumerate(self.gui.state.ruke[0]):
+        for i, karta in enumerate(ruka_za_prikaz):
             y_pos = 540
             
-            # Hover efekat skače samo u fazi IGRE ako je naš potez i karta je validna
             if karta == hoverovana_karta and self.gui.state.faza == "IGRA" and self.gui.state.na_potezu == 0:
                 if karta in validni:
                     y_pos -= 15  
@@ -309,21 +307,26 @@ class DisplayHandler:
                 screen.blit(slika, rect)
                 pygame.draw.rect(screen, CRNA, rect, 1, border_radius=3)
                 
-            # Beležimo ih u rects da bi input_handler mogao da hvata klikove
             self.gui.rects.append((rect, karta, 'ruka'))
 
     def nacrtaj_bot_karte(self, screen):
-        """Karte bot-ova (samo poledina)"""
         st = self.gui.state
-        pozicije = {
-            2: (220, 10), # Bot 2 levo
-            1: (580, 10)  # Bot 1 desno
-        }
+        pozicije = {2: (220, 10), 1: (580, 10)}
         
         for bot_id, (x, y) in pozicije.items():
-            if self.gui.poledina:
-                for i in range(len(st.ruke[bot_id])): 
-                    screen.blit(self.gui.poledina, (x + i * 15, y + 30))
+            # AKO JE KRAJ: Crtamo prave karte umesto poledine
+            if st.faza == "KRAJ":
+                # ISPRAVKA: Čitamo iz pocetne_ruke jer je redovna ruka sada prazna
+                ruka_bota = st.pocetne_ruke[bot_id] if hasattr(st, 'pocetne_ruke') else st.ruke[bot_id]
+                for i, karta in enumerate(ruka_bota):
+                    slika = self.gui.slike_karata.get(karta) 
+                    if slika:
+                        screen.blit(slika, (x + i * 15, y + 30))
+            else:
+                # Standardno crtanje poledine
+                if self.gui.poledina:
+                    for i in range(len(st.ruke[bot_id])): 
+                        screen.blit(self.gui.poledina, (x + i * 15, y + 30))
             
             ime_tekst = f"Bot {bot_id}"
             if st.na_potezu == bot_id and st.faza != "KRAJ":
@@ -337,6 +340,10 @@ class DisplayHandler:
         # 1. Zeleni sto crtamo isključivo kada smo u fazi igre
         if self.gui.state.faza == "IGRA":
             self.nacrtaj_karte_na_stolu(screen)
+
+        if self.gui.state.faza == "KRAJ":
+            self.nacrtaj_kraj_runde_prikaz(screen)
+            return # Prekidamo dalje crtanje u ovom delu
 
         # 2. Ako engine ne traži naš unos, prekidamo (nema pop-up menija)
         if not self.gui.ceka_se_unos:
@@ -367,57 +374,85 @@ class DisplayHandler:
         pygame.draw.rect(screen, BELA, (x, y, w, h), border_radius=4)
         pygame.draw.rect(screen, CRNA, (x, y, w, h), 2, border_radius=4)
         
-        #naslov = FONT_BOLD.render("TVOJ POTEZ U LICITACIJI", True, CRNA)
-        #screen.blit(naslov, (x + (w - naslov.get_width()) // 2, y + 15))
+        naslov = FONT_BOLD.render("TVOJ POTEZ U LICITACIJI", True, CRNA)
+        screen.blit(naslov, (x + (w - naslov.get_width()) // 2, y + 15))
 
         self.gui.dugmici_licitacije = []
         nivo = self.gui.state.trenutna_licitacija_broj
         
         opcije_za_prikaz = []
 
-        # 1. Numerički potezi (Moje X ILI Licitiram X+1 - nikad oba)
+        # 3. Dalje
+        if "dalje" in self.gui.dozvoljeni_potezi:
+            opcije_za_prikaz.append(("Dalje", "dalje"))
+
+        # 1. Numerički potezi
         if "moje" in self.gui.dozvoljeni_potezi:
             opcije_za_prikaz.append((f"Moje {nivo}", "moje"))
         else:
-            # Tražimo bilo koji broj u dozvoljenim potezima (npr. 2, 3, 4...)
             sledeci_broj = next((p for p in self.gui.dozvoljeni_potezi if isinstance(p, int)), None)
             if sledeci_broj:
                 opcije_za_prikaz.append((f"Licitiram {sledeci_broj}", sledeci_broj))
 
-        # 2. Specijalne igre (Igra, Betl, Sans)
+        # 2. Specijalne igre
         for sp in ["igra", "betl", "sans"]:
             if sp in self.gui.dozvoljeni_potezi:
                 opcije_za_prikaz.append((sp.capitalize(), sp))
 
-        # 3. Dalje (Uvek na kraju)
-        if "dalje" in self.gui.dozvoljeni_potezi:
-            opcije_za_prikaz.append(("Dalje", "dalje"))
+        
+
+        # --- DINAMIČKO RAČUNANJE VELIČINE I POZICIJE ---
+        broj_opcija = len(opcije_za_prikaz)
+        if broj_opcija == 0: return
+
+        dostupna_visina = h - 50 - 20 # 50 za naslov, 20 za donju marginu
+        razmak = 5
+        
+        # Visina dugmeta se menja u zavisnosti od toga koliko ih ima (max 60px)
+        btn_h = min(60, (dostupna_visina - (broj_opcija - 1) * razmak) // broj_opcija)
+        
+        ukupna_visina_elemenata = broj_opcija * btn_h + (broj_opcija - 1) * razmak
+        start_y = y + 50 + (dostupna_visina - ukupna_visina_elemenata) // 2
 
         # Crtanje dugmića
         for i, (txt, akcija) in enumerate(opcije_za_prikaz):
-            dy = y + 16 + i * 50
-            d = UIComponents.nacrtaj_dugme(screen, txt, x + 75, dy, 300, 44)
+            dy = start_y + i * (btn_h + razmak)
+            d = UIComponents.nacrtaj_dugme(screen, txt, x + 150, dy, 150, btn_h)
             self.gui.dugmici_licitacije.append((d, akcija))
 
-    def nacrtaj_genericke_dugmice(self, screen, naslov_tekst, razmak):
+    def nacrtaj_genericke_dugmice(self, screen, naslov_tekst, _razmak_ignore=0):
+        # Treći parametar (_razmak_ignore) ostaje zbog poziva iz prethodnih funkcija, 
+        # ali se više ne koristi jer sve računamo dinamički
         w, h = 450, 280
         x = (SCREEN_W - w) // 2
         y = (SCREEN_H - h) // 2
 
-        pygame.draw.rect(screen, BELA, (x, y, w, h))
-        pygame.draw.rect(screen, CRNA, (x, y, w, h), 2)
+        pygame.draw.rect(screen, BELA, (x, y, w, h), border_radius=4)
+        pygame.draw.rect(screen, CRNA, (x, y, w, h), 2, border_radius=4)
         
-        naslov = FONT_MSG.render(naslov_tekst, True, CRNA)
+        naslov = FONT_BOLD.render(naslov_tekst, True, CRNA)
         screen.blit(naslov, (SCREEN_W//2 - naslov.get_width()//2, y + 15))
         
         self.gui.dugmici_licitacije = []
+        
+        broj_opcija = len(self.gui.dozvoljeni_potezi)
+        if broj_opcija == 0: return
+
+        # --- DINAMIČKO RAČUNANJE VELIČINE I POZICIJE ---
+        dostupna_visina = h - 50 - 20 
+        razmak = 5
+        btn_h = min(65, (dostupna_visina - (broj_opcija - 1) * razmak) // broj_opcija)
+        
+        ukupna_visina_elemenata = broj_opcija * btn_h + (broj_opcija - 1) * razmak
+        start_y = y + 50 + (dostupna_visina - ukupna_visina_elemenata) // 2
         
         for i, akcija in enumerate(self.gui.dozvoljeni_potezi):
             tekst = str(akcija).capitalize()
             if akcija is True: tekst = "Pratim"
             elif akcija is False: tekst = "Ne pratim"
                 
-            d = UIComponents.nacrtaj_dugme(screen, tekst, x + 75, y + 55 + i * razmak, 300, razmak - 5)
+            dy = start_y + i * (btn_h + razmak)
+            d = UIComponents.nacrtaj_dugme(screen, tekst, x + 75, dy, 300, btn_h)
             self.gui.dugmici_licitacije.append((d, akcija))
 
     def nacrtaj_skartiranje(self, screen):
@@ -437,24 +472,24 @@ class DisplayHandler:
         red_vrednosti = {'A': 0, 'K': 1, 'Q': 2, 'J': 3, '10': 4, '9': 5, '8': 6, '7': 7}
         karte_u_ruci.sort(key=lambda k: (red_boja[k.split()[1]], red_vrednosti[k.split()[0]]))
 
-        # Centralni prozor
-        w, h = 450, 280
+        # Centralni prozor — isti stil kao nacrtaj_potvrdu_talona
+        w, h = 400, 250
         x = (SCREEN_W - w) // 2
         y = (SCREEN_H - h) // 2
 
-        pygame.draw.rect(screen, BELA, (x, y, w, h), border_radius=4)
-        pygame.draw.rect(screen, CRNA, (x, y, w, h), 2, border_radius=4)
+        pygame.draw.rect(screen, BELA, (x, y, w, h), border_radius=8)
+        pygame.draw.rect(screen, CRNA, (x, y, w, h), 2, border_radius=8)
 
-        lbl = FONT_BOLD.render("ODABERI 2 KARTE ZA ŠKART", True, CRVENA_PANEL)
-        screen.blit(lbl, (x + w // 2 - lbl.get_width() // 2, y + 10))
+        lbl = FONT_BOLD.render("ODABERI 2 KARTE ZA ŠKART", True, CRNA)
+        screen.blit(lbl, (x + w // 2 - lbl.get_width() // 2, y + 20))
 
         # Slotovi za skart karte
         KARTA_W, KARTA_H = 100, 140
-        slotovi_x = [x + 60, x + 305]
+        slotovi_x = [x + 90 + i * 120 for i in range(2)]
 
         for i in range(2):
             x_pos = slotovi_x[i]
-            y_pos = y + 40
+            y_pos = y + 50
             slot_rect = pygame.Rect(x_pos, y_pos, KARTA_W, KARTA_H)
 
             pygame.draw.rect(screen, (200, 200, 200), slot_rect, 2, border_radius=4)
@@ -464,22 +499,22 @@ class DisplayHandler:
                 slika = self.gui.slike_karata_velike.get(karta)
                 if slika:
                     screen.blit(slika, slot_rect)
-                    pygame.draw.rect(screen, CRVENA_PANEL, slot_rect, 3, border_radius=4)
+                    pygame.draw.rect(screen, ZLATNA, slot_rect, 2, border_radius=4)
                 self.gui.rects.append((slot_rect, karta, 'skart'))
             else:
                 lbl_prazno = FONT_SMALL.render("prazno", True, (150, 150, 150))
                 screen.blit(lbl_prazno, (x_pos + KARTA_W//2 - lbl_prazno.get_width()//2, y_pos + KARTA_H//2 - 8))
 
-        # Dugme / info
-        btn_y = y + h - 50
+        # Dugme / info — isti stil kao nacrtaj_potvrdu_talona
+        btn_y = y + h - 45
         if len(karte_za_skart) == 2:
             self.gui.dugme_potvrdi_skart = UIComponents.nacrtaj_dugme(
                 screen, "✓ POTVRDI ŠKART",
-                x + w//2 - 120, btn_y, 240, 40, (255, 210, 50))
+                x + w//2 - 60, btn_y, 120, 35)
         else:
             self.gui.dugme_potvrdi_skart = None
             info = FONT_MSG.render("Klikni na kartu iz ruke da je odložiš", True, CRNA)
-            screen.blit(info, (SCREEN_W//2 - info.get_width()//2, btn_y + 10))
+            screen.blit(info, (SCREEN_W//2 - info.get_width()//2, btn_y + 8))
 
         # Moje karte dole
         n = len(karte_u_ruci)
@@ -494,10 +529,23 @@ class DisplayHandler:
         start_x = SCREEN_W // 2 - ukupna_sirina // 2
         y_ruka = 540
 
+        # Hover logika
+        mis_pos = self.gui.mis_pozicija
+        hoverovana_karta = None
+        for i in reversed(range(n)):
+            rect = pygame.Rect(start_x + i * razmak, y_ruka, RUKA_W, RUKA_H)
+            if rect.collidepoint(mis_pos):
+                hoverovana_karta = karte_u_ruci[i]
+                break
+
         for i, karta in enumerate(karte_u_ruci):
-            slika = self.gui.slike_karata_velike.get(karta) 
+            y_pos = y_ruka
+            if karta == hoverovana_karta:
+                y_pos -= 15
+
+            slika = self.gui.slike_karata_velike.get(karta)
             x_k = start_x + i * razmak
-            rect = pygame.Rect(x_k, y_ruka, RUKA_W, RUKA_H)
+            rect = pygame.Rect(x_k, y_pos, RUKA_W, RUKA_H)
 
             if slika:
                 screen.blit(slika, rect)
@@ -516,7 +564,7 @@ class DisplayHandler:
         screen.blit(txt, (x + w // 2 - txt.get_width() // 2, y + 20))
 
         for i, karta in enumerate(self.gui.state.talon):
-            rect = pygame.Rect(x + 90 + i * 120, y + 60, 100, 140)
+            rect = pygame.Rect(x + 90 + i * 120, y + 50, 100, 140)
             slika = self.gui.slike_karata_velike.get(karta)
             if slika: screen.blit(slika, rect)
             pygame.draw.rect(screen, ZLATNA, rect, 2, border_radius=4)
@@ -1013,11 +1061,11 @@ class DisplayHandler:
         w, h = 450, 280
         x = (SCREEN_W - w) // 2
         y = (SCREEN_H - h) // 2
-        pygame.draw.rect(screen, BELA, (x, y, w, h))
-        pygame.draw.rect(screen, CRNA, (x, y, w, h), 2)
+        pygame.draw.rect(screen, BELA, (x, y, w, h), border_radius=4)
+        pygame.draw.rect(screen, CRNA, (x, y, w, h), 2, border_radius=4)
         self.gui.dugmici_licitacije = []
 
-        naslov = FONT_MSG.render("NAJAVI NIVO IGRE", True, CRNA)
+        naslov = FONT_BOLD.render("NAJAVI NIVO IGRE", True, CRNA)
         screen.blit(naslov, (SCREEN_W//2 - naslov.get_width()//2, y + 15))
 
         opcije = [
@@ -1030,7 +1078,55 @@ class DisplayHandler:
         if self.gui.state and len(self.gui.state.aktivni_u_licitaciji) > 1:
             opcije.append(("Slabiji sam (Dalje)", "dalje"))
 
+        # --- DINAMIČKO RAČUNANJE VELIČINE I POZICIJE ---
+        broj_opcija = len(opcije)
+        dostupna_visina = h - 50 - 15
+        razmak = 10
+        btn_h = min(40, (dostupna_visina - (broj_opcija - 1) * razmak) // broj_opcija)
+        
+        ukupna_visina_elemenata = broj_opcija * btn_h + (broj_opcija - 1) * razmak
+        start_y = y + 50 + (dostupna_visina - ukupna_visina_elemenata) // 2
+
         for i, (txt, akcija) in enumerate(opcije):
+            dy = start_y + i * (btn_h + razmak)
             boja_dugmeta = (230, 230, 230)
-            d = UIComponents.nacrtaj_dugme(screen, txt, x + 75, y + 50 + i * 40, 300, 35, boja_dugmeta)
+            d = UIComponents.nacrtaj_dugme(screen, txt, x + 75, dy, 300, btn_h, boja_dugmeta)
             self.gui.dugmici_licitacije.append((d, akcija))
+
+
+    def nacrtaj_kraj_runde_prikaz(self, screen):
+        st = self.gui.state
+        
+        # 1. DODATO: Crtamo zeleni sto ispod talona u fazi KRAJ
+        sto_rect = pygame.Rect(350, 230, 300, 220)
+        try:
+            boja_stola = TAMNO_ZELENA
+        except NameError:
+            boja_stola = (34, 139, 34) # Backup zelena za svaki slučaj
+            
+        pygame.draw.rect(screen, boja_stola, sto_rect)
+        pygame.draw.rect(screen, CRNA, sto_rect, 2)
+        
+        # Određujemo šta su bile karte u talonu/škartu
+        karte_talona = st.odbacene_karte if st.odbacene_karte else st.talon
+        
+        # 2. Naslov iznad karata
+        txt = FONT_BOLD.render("TALON OVE RUNDE:", True, ZLATNA)
+        screen.blit(txt, (SCREEN_W//2 - txt.get_width()//2, 240))
+
+        # 3. Crtanje te dve karte u centru table
+        for i, karta in enumerate(karte_talona):
+            slika = self.gui.slike_karata_velike.get(karta)
+            if slika:
+                rect = pygame.Rect(SCREEN_W//2 - 105 + i*110, 270, 100, 140)
+                screen.blit(slika, rect)
+                pygame.draw.rect(screen, CRNA, rect, 1, border_radius=4)
+
+        # 4. Dugme "PODELI" pomereno blago ispod zelenog stola
+        self.gui.dugmici_licitacije = [] 
+        btn_w, btn_h = 200, 50
+        btn_x = SCREEN_W // 2 - btn_w // 2
+        btn_y = 460 
+        
+        d = UIComponents.nacrtaj_dugme(screen, "PODELI SLEDEĆU", btn_x, btn_y, btn_w, btn_h, (255,255,255))
+        self.gui.dugmici_licitacije.append((d, "podeli"))

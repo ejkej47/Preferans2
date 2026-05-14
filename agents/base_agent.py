@@ -41,3 +41,11 @@ class BaseAgent:
     def odigraj_kartu(self, state, validne_karte):
         """Bira i vraća kartu (string) koju baca na sto."""
         raise NotImplementedError
+    
+    def potvrdi_talon(self, state):
+        """Pauzira igru dok se talon ne pregleda."""
+        raise NotImplementedError
+    
+    def ceka_novu_ruku(self, state):
+        """Metoda koja zaustavlja engine na kraju runde."""
+        raise NotImplementedError

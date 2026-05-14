@@ -52,6 +52,9 @@ class InputHandler:
                 if rect.collidepoint(pos):
                     self._prosledi_odluku(gui, "ok")
 
+        elif gui.tip_unosa == "kraj_runde":
+            self._handle_genericki_dugmici(pos, gui)
+
 
     def _handle_licitacija_klik(self, pos, gui):
         """Proverava da li je kliknuto na neko od dugmadi za licitaciju."""

@@ -17,7 +17,7 @@ def run_engine(engine):
             break
 
         engine.play_round()
-        time.sleep(0.5)
+        time.sleep(0.1)
 
 def main():
     pygame.init()

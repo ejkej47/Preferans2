@@ -54,6 +54,9 @@ class GameLoop:
         self._faza_igre()
         self._obracun()
 
+        if self.state.faza == "KRAJ":
+            self.agents[0].ceka_novu_ruku(self.state.kopiraj())
+
     def _faza_licitacije(self):
         self.state.na_potezu = self.state.prvi_licitant
         self.state.poslednja_akcija = None
@@ -248,7 +251,7 @@ class GameLoop:
         self.zavrsene_runde.append(runda_info)
 
         self.state.faza = "KRAJ"
-        time.sleep(0.1) # Dam malo vremena igraču da vidi poruku pre mešanja
+        self.agents[0].ceka_novu_ruku(self.state.kopiraj())
 
     def _faza_skartiranja_i_izbora(self):
         pid = self.state.pobednik_licitacije
@@ -294,6 +297,7 @@ class GameLoop:
             return
             
         # SLUČAJ 4: KLASIČNA IGRA SA TALONOM
+        # SLUČAJ 4: KLASIČNA IGRA SA TALONOM
         if pid == 0:
             self.state.poruka_za_ui = "Odaberi 2 karte za škart."
             skart = agent.skartiraj(self.state.kopiraj())
@@ -304,10 +308,18 @@ class GameLoop:
             self.state.talon = []
             self.state.odbacene_karte = skart
         else:
+            # --- DODATO ZA PREGLED TALONA BOTA ---
+            self.state.poruka_za_ui = f"Pregled talona koji je dobio {ime}..."
+            
+            # Prvo tražimo od Igrača (id 0) da potvrdi talon na GUI-ju
+            self.agents[0].potvrdi_talon(self.state.kopiraj())
+            
+            # Tek nakon klika, bot uzima talon i razmišlja o škartu
             self.state.ruke[pid].extend(self.state.talon)
             self.state.talon = []
             self.state.ruke[pid] = GameRules.sortiraj_ruku(self.state.ruke[pid])
             self.state.poruka_za_ui = f"{ime} uzima talon i škartira."
+            
             skart = agent.skartiraj(self.state.kopiraj())
             for k in skart: self.state.ruke[pid].remove(k)
             self.state.odbacene_karte = skart
@@ -443,7 +455,7 @@ class GameLoop:
                 if trenutni_id != 0: time.sleep(0.1)
                 self.state.na_potezu = self._sledeci_aktivni(trenutni_id, aktivni_igraci)
             
-            time.sleep(0.25)
+            time.sleep(0.1)
             pobednik_stiha = GameRules.ko_nosi_odnetak(self.state.karte_na_stolu, self.state.adut)
             
             # Snimanje stiha u listu za RoundHistory

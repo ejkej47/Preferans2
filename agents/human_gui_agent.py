@@ -50,3 +50,11 @@ class HumanGUIAgent:
         odluka = self.input_callback(state_kopija, "najava_igre", opcije)
         if odluka == "dalje": return None
         return int(odluka.split("_")[1])
+    
+    def potvrdi_talon(self, state_kopija):
+        # GUI će prikazati talon bota i čekati da klikneš "U REDU"
+        return self.input_callback(state_kopija, "potvrda_talona", ["potvrdi_pregled"])
+    
+    def ceka_novu_ruku(self, state_kopija):
+        # Šaljemo signal GUI-ju da prikaže dugme "PODELI"
+        return self.input_callback(state_kopija, "kraj_runde", ["podeli"])

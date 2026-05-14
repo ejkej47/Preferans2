@@ -1,0 +1,620 @@
+ARHITEKTURA ULTIMATIVNOG PREFERANS AI BOTA
+Kompletna Dokumentacija za Implementaciju — v2.0
+Random Forest / XGBoost · PIMC & Alpha-Beta · Bayesian Modeling · Self-Play Training
+
+================================================================================
+0. PROGRAMERSKA MAPA — PREGLED FAZA
+================================================================================
+
+Ovo je master plan implementacije. Svaka faza mora biti stabilna pre prelaska na sledeću.
+
+FAZA 1 — Osnova (Nosioc)
+    [x] Ofanzivni ML Model (Oracle) — Random Forest treniran na 10.000+ partija
+    [x] Pametno Škartiranje — Exhaustive Search (66 kombinacija) + ML evaluacija
+    [ ] EV Licitaciona Logika sa dinamičkim pragom (Sekcija 2)
+    [ ] Bodovni Kontekst Modul — score tracking po igraču (Sekcija 2D) ← NOVO
+    [ ] Betl Licitacija i osnovna logika (Sekcija 6)
+
+FAZA 2 — Taktika i Pratnja
+    [ ] Opening Lead Modul za pratioca (Sekcija 8)
+    [ ] Pratnja kod Betla — logika zvanja (Sekcija 6E) ← NOVO
+    [ ] Defanzivni ML Model za pratioca — Dolazim/Kontra/Dalje
+    [ ] Kontra/Rekontra na pratioca koji zvane Dođem (Sekcija 4D) ← NOVO
+    [ ] Refa logika — prisilna igra (Sekcija 4E) ← NOVO
+    [ ] Bayesian Belief tabela — osnovna verzija (Sekcija 9)
+    [ ] Endgame Perfect Solver (Sekcija 12)
+    [ ] Pipeline za logovanje poteza (Sekcija 11)
+    [ ] Pre-Bidding Simulation Modul (Sekcija 13) ← NOVO
+
+FAZA 3 — Napredna Strategija
+    [ ] Betl logika — Nosioc i Pratilac (Sekcija 6)
+    [ ] Signalizacija između pratilaoca (Sekcija 7)
+    [ ] Anti-Signal modul — deceptivna signalizacija (Sekcija 7D) ← NOVO
+    [ ] Opening Lead za defanzivnog pratioca — matrica odluka (Sekcija 8B) ← NOVO
+    [ ] PIMC sa Bayesian uzorkovanjem (Sekcija 9C)
+    [ ] PIMC Timeout/Fallback mehanizam (Sekcija 3D) ← NOVO
+    [ ] PIMC Transition trigger — dinamički, ne fiksni (Sekcija 3E) ← NOVO
+
+FAZA 4 — Velemajstorski Nivo
+    [ ] Squeeze i Throw-In prepoznavanje (Sekcija 14) ← NOVO
+    [ ] Opponent Profiling — psihološki profil protivnika (Sekcija 15) ← NOVO
+    [ ] Feature Importance Logging + SHAP (Sekcija 10)
+    [ ] Iterativno Self-Play treniranje
+    [ ] Epsilon-Greedy istraživanje
+    [ ] Bayesian Opponent Modeling — potpuna verzija
+    [ ] Meta-Learning između generacija (Sekcija 16) ← NOVO
+
+================================================================================
+1. FAZA 1: TRENUTNA IMPLEMENTACIJA (Fokus na Nosioca)
+================================================================================
+
+Ofanzivni ML Model ("Oracle"):
+
+    Koristimo Random Forest (kasnije XGBoost) treniran na 10.000+ partija za predviđanje prolaza/pada Nosioca.
+
+    Model koristi 28+ naprednih parametara (Features): One-Hot Encoding za boje, dužina aduta, kafanski štihovi, renonsi, singlovi, asovi/kraljevi sa strane, itd. Ovo eliminiše potrebu za dubokim neuronskim mrežama.
+
+Pametno Škartiranje (Exhaustive Search + ML):
+
+    Kada bot podigne talon, ima 12 karata (tačno 66 mogućih kombinacija za škart od 2 karte).
+
+    Algoritam generiše svih 66 mogućih ruku od 10 karata, svaku šalje ofanzivnom ML modelu i bira onaj škart koji mu daje najveći procenat šanse za pobedu.
+
+Pametna Licitacija bazirana na EV i Dinamičkom pragu:
+
+    Napuštanje fiksnog "praga hrabrosti". Model razume rizik, bodove i šta rade protivnici.
+    Detalji u Sekciji 2.
+
+================================================================================
+2. EXPECTED VALUE (EV) I OPORTUNITETNI TROŠAK
+================================================================================
+
+Bot ne procenjuje samo "da li prolazim", već koliko bodova matematički očekuje da osvoji ili izgubi, upoređujući to sa scenarijom u kojima prepušta igru protivniku.
+
+A. Asimetrija rizika (Dinamički prag)
+
+    Manje igre nose manji rizik od pada, pa je dozvoljeno kockati se sa manjim procentom prolaznosti:
+
+    Pik (2) / Karo (3): Pad boli malo (-4 ili -6). Za zvanje je dovoljno 55-60% šanse.
+
+    Tref (5) / Sans (7): Pad boli mnogo (-10 ili -14+). Za zvanje tražimo 75-85% šanse.
+
+B. Oportunitetni trošak i "Sečenje" protivnika (Swing)
+
+    Bot uzima u obzir šta će se desiti ako kaže "Dalje".
+
+    Primer: Protivnik je zvao Herc (8 poena). Bot ima Tref sa samo 60% šanse za prolaz (ispod normalnog praga za Tref). Računica: Sečenjem njegovih sigurnih 8 poena, rizikovanje sa 60% matematički se itekako isplati.
+
+C. Formula EV
+
+    EV_Moje_Igre = (Šansa_Za_Prolaz * Poeni_Za_Pobedu) - (Šansa_Za_Pad * Kazna_Za_Pad)
+    EV_Dalje     = -1 * (Šansa_Protivnika_Za_Prolaz * Poeni_Njegove_Igre)
+    Potez        = Biramo opciju koja daje veći (pozitivniji) EV
+
+D. ← NOVO: Bodovni Kontekst Modul
+
+    EV formula mora biti svesna trenutnog stanja na tablji, ne samo bodova jedne runde.
+
+    Bot koji gubi 20 poena matematički treba da rizikuje više — inače gubi meč pasivno.
+    Bot koji vodi igra konzervativno — svaki nepotreban pad smanjuje prednost.
+
+    Implementacija: Injektovati score_context objekat u EV kalkulator pre svake licitacione odluke.
+
+    Obavezna polja score_context-a:
+        - moj_score, protivnik1_score, protivnik2_score (trenutno stanje tablji)
+        - cilj_igre (npr. -20 ili dogovoreni maksimum)
+        - razlika_do_kraja (procena broja preostalih rundi)
+
+================================================================================
+3. FAZA 2: TAKTIKA BACANJA KARATA (Tree Search)
+================================================================================
+
+Hibridni Mozak (Opening Book + PIMC):
+
+    Prve 2-3 karte (heuristika): PIMC bi ovde bio prespor (kombinatorna eksplozija). Bot igra po brzim ručnim pravilima. Videti Sekciju 8.
+
+    Završnica (ispod 8 karata): Bot gasi heuristiku i pali PIMC. Za poslednje 3-4 karte aktivira se Endgame Perfect Solver (Sekcija 12).
+
+Minimax sa Alpha-Beta Odsecanjem:
+
+    Unutar PIMC "paralelnih univerzuma", igra se posmatra kao borba 2 pratioca koji sarađuju vs Nosilac. Zero-sum game — idealno za brz Alpha-Beta algoritam.
+
+Transpozicione tabele (Zobrist Hashing):
+
+    Keširanje izračunatih stanja. Ako smo već videli isti raspored karata, ne računamo ponovo. Ubrzava CPU računanje 5-10 puta.
+
+D. ← NOVO: PIMC Timeout/Fallback Mehanizam
+
+    Kritično za stabilnost igre — bez ovoga bot može da zamrzne.
+
+    Definisati maksimalni CPU budget po potezu (npr. 500ms hard limit).
+
+    Ako PIMC ne završi unutar limita, bot automatski pada nazad na heuristiku.
+
+    Fallback logika mora biti uvek aktuelna i testirana — nije samo backup.
+
+    Logovati svaki timeout: koliko simulacija je urađeno, koji potez je izabran, razlika od optimalnog.
+
+E. ← NOVO: Dinamički PIMC Transition Trigger
+
+    Zamenjuje fiksni "prvih 2-3 karte = heuristika".
+
+    Trigger za prelaz na PIMC nije broj odigranih karata, već broj preostalih NEPOZNATIH karata.
+
+    Preporučena granica: Kada ukupan prostor nepoznatih karata padne ispod N permutacija (empirijski odrediti, npr. 5.000).
+
+    Prednost: U rukama sa renonsom, PIMC se aktivira ranije jer je prostor manji.
+
+    Implementacija: Modul koji kontinuirano prati veličinu prostora i šalje trigger signal.
+
+================================================================================
+4. PRATNJA, ZOVEM I KONTRA
+================================================================================
+
+Ova faza je matematička. Procenjuje snagu na osnovu broja aduta, adutskog keca i asova sa strane.
+
+SCENARIO A: Oba pratioca su u igri (Standardna procena "Dolazim")
+
+    4+ aduta: Uvek prati.
+    3 aduta: Prati ako ima jakog aduta (A, K, Q) ili bar 1 Keca sa strane, ili 1 opšti štih.
+    2 aduta: Prati ako ima adutskog Asa, ili adutskog Kralja + 1 Keca sa strane, ili 2 Keca sa strane.
+    1 adut: Prati ako ima adutskog Asa + 1 Keca sa strane, ili 2 Keca sa strane.
+    0 aduta: Prati samo ako ima 3 Keca sa strane.
+
+SCENARIO B: Prvi pratilac je pobegao (Pravila za drugog pratioca)
+
+    Drugi pratilac uvek ima pravo: Dođem (igra sam, mora uzeti 4 štiha), Zovem (zajedno skupljaju 4 štiha), Dalje (odustaje).
+
+    STRATEGIJA BOTA - DOĐEM:
+        Isključivo kada mu ne treba pomoć: 4+ aduta ILI 4+ opštih štihova uz minimum 2 aduta.
+
+    STRATEGIJA BOTA - ZOVEM (na boju):
+        3 aduta + (1 Kec sa strane ILI Adutski Kec)
+        2 aduta + (2 Keca sa strane ILI Adutski Kec + 1 Kec sa strane)
+        1 adut + (2 Keca sa strane i ukupno 3 štiha)
+
+    STRATEGIJA BOTA - ZOVEM (na Sans/Betl):
+        Striktno 2 čista Aca ILI 4+ opštih štihova. Treća Dama se ne priznaje.
+
+    Ako nema ništa od ovoga, ODUSTAJE (Nosilac tada automatski prolazi sa fiktivnih 6 štihova).
+
+KONTRA:
+
+    Ekstremno oštra! Gotovo siguran pad Nosioca.
+    5+ aduta uz 1 Keca sa strane -> Kontra.
+    4+ aduta uz 2 Keca sa strane -> Kontra.
+
+D. ← NOVO: Kontra/Rekontra na Pratioca
+
+    Kada Pratilac 2 zvane "Dođem", Pratilac 1 ima pravo da ga kontira.
+
+    Logika kontre na Pratioca je ogledalna — procenjuješ koliko štihova može da uzme pratilac, ne nosioc.
+
+    Kontra na Dođem: Pratilac 1 nema aduta i nema kece sa strane = Pratilac 2 neće uzeti 4 štiha.
+
+    Rekontra: Bot zvane Dođem pa ga kontraju — rekontra samo ako ima jasnu prednost (5+ aduta ili 4+ opšta štiha).
+
+E. ← NOVO: Refa Logika
+
+    Refa se igra kada su svi igrači na nuli (ili kada niko ne želi da licitira).
+
+    U Refi nema slobode licitacije — igra se prisilno prema redosledu.
+
+    Implementacija: Poseban flag refa_mode = True koji gasi sve EV i ML module licitacije.
+
+    Bodovanje Refe je drugačije — poseban bodovni modul, odvojen od standardnih igara.
+
+    KRITIČNO ZA PODATKE: Sve Refa runde filtrirati iz CSV pre treninga (nivo_licitacije = 0).
+
+F. ← NOVO: Zovem — Na višu boju ili istu
+
+    Kada Pratilac 2 zove nazad prvog, bira da li zove na ISTOJ boji nosioca ili višoj.
+
+    Primer: Nosioc igra Herc. P1 pobegao. P2 ima jak Tref.
+
+    Logika: P2 zove Tref (viši nivo) samo ako mu je Tref jači i može skupiti 4 štiha sa P1 na Trefu.
+    Inače zove nazad na Hercu (nosiočeva boja ostaje adut).
+
+================================================================================
+5. KLJUČNA PRAVILA I NAPOMENE
+================================================================================
+
+Izbegavanje "Eho Komore" (Overfitting na protivnika):
+
+    Tokom iterativnog treniranja, bot mora koristiti Epsilon-Greedy pristup (u 5-10% slučajeva bot baca potpuno nasumičnu kartu ili zvanje). Prisiljava na istraživanje novih taktika.
+
+Upravljanje Podacima (.gitignore):
+
+    Modeli (.pkl fajlovi) i podaci (.csv fajlovi) nikada ne idu na Git.
+    Na Gitu ostaju samo: source kod, schema CSV-a (kao .md fajl), i skripte za generisanje.
+
+Filtriranje šuma iz podataka:
+
+    Uvek čistiti CSV od prisilnih igara (Refa, nivo_licitacije = 0).
+    Model mora da uči samo iz situacija gde je igrač imao opciju slobodne volje.
+
+================================================================================
+6. BETL LOGIKA (Posebna igra — Inverzna logika)
+================================================================================
+
+Betl (nivo 6) je potpuno drugačija igra. Cilj je izgubiti SVE štihove. Zahteva poseban modul sa inverznom logikom od svega ostalog u sistemu.
+
+A. Licitacija Betla
+
+    Idealna Betl ruka: Nema Asova. Nema dugih boja (maks 3 karte u svakoj). Ima "rupa" (renons) gde može da se škartira.
+
+    Opasan signal: 2+ Asa ili jedna boja sa 4+ karte — Betl je visokorizičan.
+
+    EV logika se primenjuje i ovde: Betl donosi 12 poena. Ako je šansa > 70%, zvanje je matematički opravdano.
+
+B. Škartiranje za Betl
+
+    Inverzno od normalne logike! Bot baca VISOKE karte (Asove, Kraljeve), čuva male.
+
+    Prioritet škarta: Kec iz duge boje > Kralj iz duge boje > Dama.
+
+    Cilj: Napraviti renons (0 karata) u bar jednoj boji — sigurno mesto za bekstvo.
+
+C. Igranje karata kao Nosioc u Betlu
+
+    Otvara uvek NAJMANJI kartu u svojoj najsigurnijoj boji.
+
+    Ako protivnik uzme štih — odlično. Ako ne uzme, bot procenjuje može li pobegnuti u renons.
+
+    Nikada ne otvara boju u kojoj je Gospodar (drži najveću kartu) — to je siguran štih koji ne sme uzeti.
+
+D. Igranje karata kao Pratilac protiv Betla
+
+    Pratioci SARAĐUJU da natovare Betl igrača štihovima.
+
+    Pratilac ubacuje NAJVEĆU kartu u boji u kojoj Betl igrač nema Gospodara.
+
+    Ako Betl igrač igra malu kartu — pratilac ubacuje kartu ispod njega, ostavljajući drugom pratiocu da natovar veću.
+
+E. ← NOVO: Pratnja kod Betla — Logika Zvanja
+
+    Kada Nosioc licitira Betl, pratnja je drugačija kalkulacija od standardnih boja.
+
+    Cilj pratioca NIJE da prođe — već da NATOVAR Betl igrača štihovima.
+
+    Procena "Dolazim" kod Betla:
+        - Imam li boju u kojoj Betl igrač verovatno nema Gospodara? (na osnovu Bayesian procene)
+        - Imam li visoke karte u dovoljno boja da ga gurnem na štih?
+        - Ako DA na oba: Pratilac zvane Dolazim. Inače: Dalje (ne kvari partnera).
+
+    Kontra na Betl: Samo ako si siguran da Betl igrač ne može izbeći određeni štih — npr. imaš sve karte ispod njegove u jednoj boji.
+
+================================================================================
+7. SIGNALIZACIJA IZMEĐU PRATILAOCA (Partnerska komunikacija)
+================================================================================
+
+Pratioci u Preferansu komuniciraju kartama. Bot mora i SLATI i ČITATI ove signale.
+
+A. Slanje signala (bot kao pratilac)
+
+    Visoka karta na siguran štih: "Imam tu boju, nastavi u nju."
+
+    Mala karta na siguran štih: "Nemam tu boju / slaba sam u njoj, menjaj napad."
+
+    Bacanje škarta iz boje (quando se mora): Bot baca iz boje u kojoj je najslabiji, implicitno signalizujući gde je jak.
+
+B. Čitanje signala (bot gleda partnera)
+
+    Pratilac 1 igra visoku kartu pri otvaranju -> ima sekvencu ili je jak u toj boji.
+
+    Pratilac 1 baca mali škart iz neke boje -> nema tu boju, ne napadaj je.
+
+    Implementacija: Bot interno vodi "Signal Table" po igraču — za svaku boju: JAKA / SLABA / NEPOZNATO.
+
+C. Ograničenje signalizacije
+
+    Signali su heuristika, ne garancija. Bayesian modul (Sekcija 9) koristi signal kao prior, ali ga ne tretira kao apsolutnu istinu.
+
+D. ← NOVO: Anti-Signal Modul (Deception)
+
+    Pravi velemajstor ponekad šalje lažni signal — baca kartu koja sugeriše boju koju nema.
+
+    Cilj: Protivnik pogrešno prilagodi strategiju i troši resurse na boju koja nije pretnja.
+
+    Implementacija: Epsilon-Greedy na nivou signalizacije. U X% slučajeva (empirijski odrediti, npr. 15%) bot šalje inverzni signal umesto tačnog.
+
+    VAŽNO: Anti-signal se ne sme koristiti kada partner kritično čita signale. Modul mora proceniti cenu dezinformacije sopstvenog partnera vs korist od obmane nosioca.
+
+================================================================================
+8. OPENING LEAD STRATEGIJA (Prva karta pratioca)
+================================================================================
+
+Prva karta je jedna od najvažnijih odluka u rundi. Dedikovani modul, odvojen od opšte logike igranja.
+
+A. Prioritet odluke — Opšta pravila (od najvišeg ka najnižem)
+
+    1. Singl adut (1 adut u ruci): Igraj ga odmah — iznudi nosiočev visoki adut.
+
+    2. Najduža obična boja, malom kartom: Cilj je iznuditi nosiocu aduta za sečenje.
+
+    3. Ako imaš Gospodara (As ili King-Gospodar) u kratkoj boji (1-2 karte): Otvori tu boju — uzmi štih odmah.
+
+    4. Singl u običnoj boji (ne adut): Otvori singl, planiraj sečenje adutom u sledećem štihu.
+
+    5. Defanzivna varijanta (ako si "Ispod Nosioca"): Igraj najmanji kartu — ne daj nosiocu da jeftino prođe.
+
+    Poseban slučaj — Kontra situacija: Opening Lead mora biti agresivan: udari u boju gde Nosilac mora trošiti adute defanzivno.
+
+B. ← NOVO: Opening Lead za Defanzivnog Pratioca u Mraku
+
+    Pratilac koji igra "ispod Nosioca" donosi odluke bez uvida u partnerovu ruku.
+
+    Matrica odluka:
+        - Imam Asa u kratkoj boji (1-2 karte): Igraj Asa — uzmi siguran štih odmah, partner vidi boju.
+        - Imam singl u boji: Igraj singl — Nosioc mora odgovoriti, čekaš sa adutom.
+        - Nemam ni jedno ni drugo: Igraj MALU kartu iz najkraće boje — ne otvaraj dugu boju pre partnera.
+        - ZABRANA: Nikada ne otvaraj boju sa Damom (Q) kao prvom kartom — previše koštaš sopstvenu strukturu.
+
+================================================================================
+9. BAYESIAN UPDATE TOKOM IGRE (Kontinuirano modelovanje protivnika)
+================================================================================
+
+Bayesian ažuriranje mora biti aktivan modul od prvog poteza licitacije, ne tek u PIMC fazi.
+
+A. Šta se beleži od početka runde
+
+    Licitacija: Ko je licitirao, do kog nivoa, kada je stao. Svaka odluka sužava distribuciju karata.
+        Primer: Protivnik nije prešao Herc -> verovatno nema jak Tref/Sans.
+
+    Pratnja (Dolazim/Dalje): Ako pratilac kaže "Dalje" na niskom nivou, ima malo aduta.
+
+    Karte koje su pale: Svaka odigrana karta eliminiše jednu mogućnost.
+
+    Sečenja i renonsi: Ako igrač nije odgovorio bojom — sigurno nema tu boju. Ovo je TVRDA informacija, ne soft prior.
+
+B. Struktura Belief tabele (po igraču)
+
+    Za svakog protivnika bot vodi:
+        P(karta X kod igrača Y) — verovatnoća da igrač Y ima kartu X.
+
+    Ažurira se Bajesovim pravilom posle svakog otkrivenog poteza.
+
+C. Integracija sa PIMC
+
+    Kada PIMC generiše "paralelni univerzum", uzorkovanje se vrši iz Belief tabele, ne uniformno.
+    Karte sa P ≈ 0 (tvrdo isključene renonsom) nikada ne idu tom igraču.
+
+================================================================================
+10. FEATURE IMPORTANCE I INTERPRETABILNOST MODELA
+================================================================================
+
+Interpretabilnost mora biti ugrađena od starta, ne naknadno.
+
+A. SHAP vrednosti (obavezno)
+
+    Nakon svakog treninga, generisati SHAP summary plot za sve feature-e.
+
+    Ako "dužina aduta" nije u top 5, nešto je pogrešno sa podacima.
+
+B. Feature importance log
+
+    Čuvati feature_importance.csv posle svakog treninga u /logs/.
+
+    Format: [datum_treninga, naziv_modela, feature, importance_score]
+
+    Omogućava praćenje kako se model menja kroz generacije (Gen 1 vs Gen 5).
+
+C. Debugging grešaka modela
+
+    Kada model napravi grešku (npr. zvao i pao sa 40% šansom), logovati CELU feature matricu tog poteza.
+
+    Praviti "Hall of Shame" CSV — zbirku najlošijih odluka — i analizirati ručno.
+
+================================================================================
+11. PIPELINE ZA GENERISANJE I UPRAVLJANJE PODACIMA
+================================================================================
+
+Arhitektura podataka mora biti definisana pre ozbiljnog treniranja.
+
+A. Šta se loguje (granularnost: potez-po-potez)
+
+    Svaki potez se snima kao jedan red u CSV-u. Nije dovoljno logovati samo ishod runde.
+
+    Obavezna polja po potezu:
+        - runda_id          (jedinstveni ID runde)
+        - potez_broj        (redni broj poteza u rundi, 1-10)
+        - igrač             (koji bot igra)
+        - karte_u_ruci      (stanje ruke pre poteza, one-hot encoded)
+        - karte_na_stolu    (šta je već odigrano u ovom štihu)
+        - karte_pale_ukupno (sve karte koje su ikad pale, bitno za Bayesian)
+        - licitacija_log    (ko je licitirao šta)
+        - odigrana_karta    (odluka bota)
+        - ishod_štiha       (ko je uzeo)
+        - ishod_runde       (prolaz/pad, popunjava se na kraju)
+
+B. Filtriranje i čišćenje
+
+    Brisati sve runde gde je nivo_licitacije = 0 (prisilna Refa).
+
+    Brisati poteze u kojima bot nije imao izbor (samo jedna legalna karta) — ne doprinose učenju.
+
+C. Verzionisanje podataka
+
+    Svaka generacija treninga čuva podatke u odvojenom folderu:
+        /data/gen1/, /data/gen2/, itd.
+
+    Nikad ne prepisivati starije podatke — potrebni za analizu regresije između generacija.
+
+D. .gitignore pravilo
+
+    /data/, /models/, /logs/*.pkl  — ništa od ovoga ne ide na Git.
+
+    Na Gitu ostaju samo: source kod, schema CSV-a (kao .md fajl), i skripte za generisanje.
+
+================================================================================
+12. ENDGAME PERFECT SOLVER (Poslednje 3-4 karte)
+================================================================================
+
+Kada ostanu 3 ili manje karata u rukama svih igrača, Monte Carlo simulacija je nepotrebna.
+
+A. Kada se aktivira
+
+    Trigger: Ukupno <= 9 karata preostalo u igri (3 karte po igraču).
+
+    Bot gasi PIMC i aktivira Endgame Solver.
+
+B. Kako radi
+
+    Čisto minimax pretraživanje BEZ Monte Carlo uzorkovanja.
+
+    Ako su preostale karte protivnika nepoznate, Solver generiše SVE moguće permutacije i bira potez koji je optimalan u SVIM permutacijama (pesimistički minimax) ili u ponderisanom proseku (Bayesian minimax).
+
+C. Integracija sa Belief tabelom (Sekcija 9)
+
+    Solver koristi Belief tabelu da uteži permutacije — verovatnije distribucije dobijaju veću težinu.
+
+    Rezultat: Egzaktna, matematički optimalna odluka za završnicu runde.
+
+D. Performanse
+
+    Na 3 karte po igraču: trivijalno brzo (< 1ms).
+    Na 4 karte: može biti potreban Alpha-Beta pruning ako se Solver aktivira ranije.
+
+================================================================================
+13. ← NOVO: PRE-BIDDING SIMULATION MODUL
+================================================================================
+
+Ovaj modul poboljšava preciznost licitacione procene simuliranjem cele runde PRE nego što bot donese odluku.
+
+Kako radi:
+
+    Pre licitacije, bot pokreće N brzih simulacija cele runde sa nasumičnim rasporedom preostalih karata.
+
+    Preporučeno N = 100-200 simulacija (brzina vs preciznost, empirijski podesiti).
+
+    Svaka simulacija koristi Belief tabelu (Sekcija 9) za realističniji raspored — ne uniformno nasumično.
+
+    Izlaz: Empirijska distribucija šanse za prolaz, direktno korišćena u EV kalkulatoru (Sekcija 2).
+
+Prednost nad čistim heuristikama:
+
+    Heuristika broji kafanske štihove i adute, ali ne vidi interakciju između karata (split adut, odgovaranje na renons, itd.).
+
+    Simulacija automatski modeluje ove interakcije bez eksplicitnih pravila.
+
+    Posebno korisno za edge case ruke (singl adut, mešovita snaga).
+
+Integracija u Pipeline:
+
+    Faza 1: Heuristika (trenutno).
+    Faza 2: Pre-Bidding Simulation zamenjuje ili dopunjuje heuristiku za licitaciju.
+    Faza 3: Simulacija se kombinuje sa Bayesian uzorkovanjem za maksimalnu preciznost.
+
+================================================================================
+14. ← NOVO: SQUEEZE I THROW-IN SITUACIJE (Napredne endgame taktike)
+================================================================================
+
+Endgame Solver (Sekcija 12) može naći ove situacije minimaxom, ali eksplicitno prepoznavanje ubrzava solver i povećava pouzdanost.
+
+Squeeze:
+
+    Situacija: Protivnik mora čuvati dve boje istovremeno, a ima premalo karata.
+
+    U nekom trenutku mora da popusti jednu boju — što otvara sigurne štihove botu.
+
+    Pattern: Bot ima 2 potencijalna Gospodara u različitim bojama. Protivnik čuva oba. Bot igra treću boju da ga prisili na izbor.
+
+    Implementacija: Modul koji prepoznaje "dual threat" situaciju i signalizuje Endgame Solveru da traži Squeeze liniju.
+
+Throw-In (Endšpil zamka):
+
+    Bot namerno pušta protivnika da uzme štih.
+
+    Iz pozicije gde je protivnik "na potezu", bot uzima sve ili većinu preostalih štihova.
+
+    Pattern: Bacaš kartu u boji gde protivnik ima samo visoke karte + must-play situaciju.
+
+Implementacija:
+
+    Pattern Recognition Layer iznad Endgame Solvera.
+
+    Ako prepozna Squeeze ili Throw-In, šalje hint solveru da produbi pretragu u tom smeru.
+
+    Štedi CPU jer solver ne mora pretraživati sve grane — samo potvrdi hint.
+
+================================================================================
+15. ← NOVO: OPPONENT PROFILING (Psihološki profil protivnika)
+================================================================================
+
+Bayesian update (Sekcija 9) prati karte. Opponent Profiling prati STIL igranja. Dva odvojena sistema koji se dopunjuju.
+
+Šta se profiluje:
+
+    Licitaciona agresivnost: Da li protivnik blefira? Licitira sa slabom rukom ili je uvek pouzdan?
+
+    Pratilačka strategija: Ide li Dolazim sa malo aduta ili je konzervativan?
+
+    Signalna konzistentnost: Da li njegovi signali prate standardnu konvenciju ili je nasumičan?
+
+    Endgame greške: Pravi li greške u završnicama pod pritiskom?
+
+Implementacija:
+
+    Profile objekat po igraču, ažurira se kroz partije (ne samo jednu rundu).
+
+    Parametri profila su klizne srednje vrednosti (rolling average) da bi uhvatile promenu stila.
+
+    Integracija sa EV: Ako protivnik ima visoku "blef stopu", snizi prag za Kontru.
+
+    Posebna korist u Self-Play: Gen 5 bot koji "prepozna" da igra protiv Gen 2 može ga eksploatisati eksplicitno.
+
+Privatnost između generacija:
+
+    Profili se NE prenose između meča — svaki meč počinje sa neutralnim priorom.
+
+    Profili se grade tokom meča, iz informacija viđenih u toj sesiji.
+
+================================================================================
+16. ← NOVO: META-LEARNING IZMEĐU GENERACIJA
+================================================================================
+
+Self-play treniranje (Sekcija 4) opisuje generacijski napredak, ali bez mehanizma koji detektuje regresiju ili objašnjava promene.
+
+Automatski Diff Feature Importance:
+
+    Posle svakog treniranja generacije, pokrenuti skriptu koja poredi feature_importance.csv Gen N vs Gen N-1.
+
+    Alert ako se važnost nekog ključnog featurea dramatično promeni (npr. dužina aduta padne iz top 3 van top 10).
+
+    Detektuje regresiju u modelu pre nego što se pusti u igru.
+
+Frozen Benchmark:
+
+    Gen 1 model se nikada ne briše — referentna tačka za merenje napretka.
+
+    Svaka nova generacija mora biti testirana direktno protiv Gen 1 u N simuliranih mečeva.
+
+    Ako Nova_Gen winrate vs Gen 1 < 60%, generacija se ne prihvata.
+
+Regresioni Alerting:
+
+    Ako Gen N+1 igra lošije od Gen N u benchmark testu, automatski rollback na Gen N.
+
+    Logovati razlog regresije u /logs/regression_report/.
+
+Generacijski Changelog:
+
+    Svaka generacija mora imati CHANGELOG.md koji opisuje:
+        - Šta je novo u trening podacima?
+        - Koji su bili top 5 feature-i po SHAP vrednostima?
+        - Winrate vs prethodna generacija?
+        - Najčešće greške iz Hall of Shame?
+
+================================================================================
+NAPOMENA ZA PROGRAMERA
+================================================================================
+
+Dokumenti označeni sa "← NOVO" su dodaci v2.0.
+Sve sekcije su usklađene sa redosledom implementacije u Sekciji 0 (Programerska Mapa).
+Svaka nova faza pretpostavlja stabilnost prethodne.
+
+KRITIČNI REDOSLED:
+    - Nikada ne skakati između faza. Faza 2 bez stabilne Faze 1 = nestabilna arhitektura.
+    - PIMC Timeout (Sekcija 3D) mora biti implementiran čim se PIMC uvede — nije opciono.
+    - Bodovni Kontekst (Sekcija 2D) uvesti pre EV logike — inače EV ne može biti tačan.
+    - Filtriranje Refa rundi (Sekcija 11) mora biti aktuelno od prvog dana logovanja podataka.
