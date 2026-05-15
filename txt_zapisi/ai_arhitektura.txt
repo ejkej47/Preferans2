@@ -194,27 +194,6 @@ D. ← NOVO: Kontra/Rekontra na Pratioca
 
     Rekontra: Bot zvane Dođem pa ga kontraju — rekontra samo ako ima jasnu prednost (5+ aduta ili 4+ opšta štiha).
 
-E. ← NOVO: Refa Logika
-
-    Refa se igra kada su svi igrači na nuli (ili kada niko ne želi da licitira).
-
-    U Refi nema slobode licitacije — igra se prisilno prema redosledu.
-
-    Implementacija: Poseban flag refa_mode = True koji gasi sve EV i ML module licitacije.
-
-    Bodovanje Refe je drugačije — poseban bodovni modul, odvojen od standardnih igara.
-
-    KRITIČNO ZA PODATKE: Sve Refa runde filtrirati iz CSV pre treninga (nivo_licitacije = 0).
-
-F. ← NOVO: Zovem — Na višu boju ili istu
-
-    Kada Pratilac 2 zove nazad prvog, bira da li zove na ISTOJ boji nosioca ili višoj.
-
-    Primer: Nosioc igra Herc. P1 pobegao. P2 ima jak Tref.
-
-    Logika: P2 zove Tref (viši nivo) samo ako mu je Tref jači i može skupiti 4 štiha sa P1 na Trefu.
-    Inače zove nazad na Hercu (nosiočeva boja ostaje adut).
-
 ================================================================================
 5. KLJUČNA PRAVILA I NAPOMENE
 ================================================================================
@@ -223,14 +202,10 @@ Izbegavanje "Eho Komore" (Overfitting na protivnika):
 
     Tokom iterativnog treniranja, bot mora koristiti Epsilon-Greedy pristup (u 5-10% slučajeva bot baca potpuno nasumičnu kartu ili zvanje). Prisiljava na istraživanje novih taktika.
 
-Upravljanje Podacima (.gitignore):
 
-    Modeli (.pkl fajlovi) i podaci (.csv fajlovi) nikada ne idu na Git.
-    Na Gitu ostaju samo: source kod, schema CSV-a (kao .md fajl), i skripte za generisanje.
 
 Filtriranje šuma iz podataka:
 
-    Uvek čistiti CSV od prisilnih igara (Refa, nivo_licitacije = 0).
     Model mora da uči samo iz situacija gde je igrač imao opciju slobodne volje.
 
 ================================================================================
@@ -251,8 +226,6 @@ B. Škartiranje za Betl
 
     Inverzno od normalne logike! Bot baca VISOKE karte (Asove, Kraljeve), čuva male.
 
-    Prioritet škarta: Kec iz duge boje > Kralj iz duge boje > Dama.
-
     Cilj: Napraviti renons (0 karata) u bar jednoj boji — sigurno mesto za bekstvo.
 
 C. Igranje karata kao Nosioc u Betlu
@@ -267,22 +240,7 @@ D. Igranje karata kao Pratilac protiv Betla
 
     Pratioci SARAĐUJU da natovare Betl igrača štihovima.
 
-    Pratilac ubacuje NAJVEĆU kartu u boji u kojoj Betl igrač nema Gospodara.
-
     Ako Betl igrač igra malu kartu — pratilac ubacuje kartu ispod njega, ostavljajući drugom pratiocu da natovar veću.
-
-E. ← NOVO: Pratnja kod Betla — Logika Zvanja
-
-    Kada Nosioc licitira Betl, pratnja je drugačija kalkulacija od standardnih boja.
-
-    Cilj pratioca NIJE da prođe — već da NATOVAR Betl igrača štihovima.
-
-    Procena "Dolazim" kod Betla:
-        - Imam li boju u kojoj Betl igrač verovatno nema Gospodara? (na osnovu Bayesian procene)
-        - Imam li visoke karte u dovoljno boja da ga gurnem na štih?
-        - Ako DA na oba: Pratilac zvane Dolazim. Inače: Dalje (ne kvari partnera).
-
-    Kontra na Betl: Samo ako si siguran da Betl igrač ne može izbeći određeni štih — npr. imaš sve karte ispod njegove u jednoj boji.
 
 ================================================================================
 7. SIGNALIZACIJA IZMEĐU PRATILAOCA (Partnerska komunikacija)
@@ -429,8 +387,6 @@ A. Šta se loguje (granularnost: potez-po-potez)
 
 B. Filtriranje i čišćenje
 
-    Brisati sve runde gde je nivo_licitacije = 0 (prisilna Refa).
-
     Brisati poteze u kojima bot nije imao izbor (samo jedna legalna karta) — ne doprinose učenju.
 
 C. Verzionisanje podataka
@@ -439,12 +395,6 @@ C. Verzionisanje podataka
         /data/gen1/, /data/gen2/, itd.
 
     Nikad ne prepisivati starije podatke — potrebni za analizu regresije između generacija.
-
-D. .gitignore pravilo
-
-    /data/, /models/, /logs/*.pkl  — ništa od ovoga ne ide na Git.
-
-    Na Gitu ostaju samo: source kod, schema CSV-a (kao .md fajl), i skripte za generisanje.
 
 ================================================================================
 12. ENDGAME PERFECT SOLVER (Poslednje 3-4 karte)

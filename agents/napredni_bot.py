@@ -238,71 +238,97 @@ class NapredniBot(BaseAgent):
     def odluci_pratnju(self, state):
         ruka = state.ruke[self.id]
         adut = state.adut
-        stihovi, _, max_duzina, karte_po_bojama = self._analiziraj_ruku(ruka)
+        _, _, _, karte_po_bojama = self._analiziraj_ruku(ruka)
         
         nosilac = state.pobednik_licitacije
         prvi_pratilac = (nosilac + 1) % 3
-        partner_odustao = (self.id != prvi_pratilac and state.igraci_koji_dolaze.get(prvi_pratilac) is False)
+        sam_prvi = (self.id == prvi_pratilac)
         
-        # --- 1. OSNOVNA PROCENA SNAGE (Scenario A - kada partner još nije pobegao) ---
-        if adut in ["Betl", "Sans"]:
-            imam_snagu = stihovi >= 2
-        else:
-            duzina_aduta = len(karte_po_bojama.get(adut, []))
-            aduti_u_ruci = karte_po_bojama.get(adut, [])
-            jaki_aduti = sum(1 for k in aduti_u_ruci if k in ['A', 'K', 'Q'])
-            sigurni_stihovi_sa_strane = sum(1 for b, v in karte_po_bojama.items() if b != adut and 'A' in v)
-            
-            imam_snagu = False
-            if duzina_aduta >= 4: imam_snagu = True
-            elif duzina_aduta == 3 and (jaki_aduti >= 1 or sigurni_stihovi_sa_strane >= 1 or stihovi >= 1): imam_snagu = True
-            elif duzina_aduta == 2 and ('A' in aduti_u_ruci or ('K' in aduti_u_ruci and sigurni_stihovi_sa_strane >= 1) or sigurni_stihovi_sa_strane >= 2): imam_snagu = True
-            elif duzina_aduta == 1 and ('A' in aduti_u_ruci and sigurni_stihovi_sa_strane >= 1 or sigurni_stihovi_sa_strane >= 2): imam_snagu = True
-            elif duzina_aduta == 0 and sigurni_stihovi_sa_strane >= 3: imam_snagu = True
+        partner_odustao = False
+        partner_dosao = False
+        if not sam_prvi:
+            partner_odustao = (state.igraci_koji_dolaze.get(prvi_pratilac) is False)
+            partner_dosao = (state.igraci_koji_dolaze.get(prvi_pratilac) is True)
 
-        # --- 2. DONOŠENJE ODLUKE (Scenario B - šta ako je partner pobegao?) ---
-        if imam_snagu:
+        if adut == "Betl":
+            return True
+
+        # --- BROJANJE ŠTIHOVA PO TVOJIM PRAVILIMA ---
+        adut_stihovi = 0
+        sa_strane_stihovi = 0
+        sa_strane_jaki_stihovi = 0 # Samo A ili drugi K (za zategnuto pravilo)
+        ima_jak_adut = False       # A ili drugi K u adutu
+
+        for boja, karte in karte_po_bojama.items():
+            duzina = len(karte)
+            if duzina == 0: continue
+            
+            if boja == adut:
+                if 'A' in karte or ('K' in karte and duzina >= 2):
+                    ima_jak_adut = True
+                    
+                # U adutu sabiramo sve
+                if 'A' in karte: adut_stihovi += 1
+                if 'K' in karte and duzina >= 2: adut_stihovi += 1
+                if 'Q' in karte and duzina >= 3: adut_stihovi += 1
+            else:
+                # Sa strane max 1 štih i to SAMO ako je dužina < 4
+                if duzina < 4:
+                    # Svi priznati štihovi (A, K2, Q3)
+                    if 'A' in karte or ('K' in karte and duzina >= 2) or ('Q' in karte and duzina >= 3):
+                        sa_strane_stihovi += 1
+                    # Surovo jaki štihovi za zategnuto pravilo (Samo A ili K2)
+                    if 'A' in karte or ('K' in karte and duzina >= 2):
+                        sa_strane_jaki_stihovi += 1
+
+        ukupno_stihova = adut_stihovi + sa_strane_stihovi
+        
+        # Brojanje za Sans (nema aduta, važe pravila kao za "sa strane")
+        # Brojanje za Sans (nema aduta, max 1 štih po boji)
+        ukupno_sans = 0
+        for boja, karte in karte_po_bojama.items():
+            d = len(karte)
+            if d == 0: continue
+            
+            # Kec je UVEK siguran štih, bez obzira na dužinu boje!
+            if 'A' in karte:
+                ukupno_sans += 1
+            # Za Kralja i Damu važi pravilo da boja mora biti kraća od 4
+            elif d < 4:
+                if 'K' in karte and d >= 2:
+                    ukupno_sans += 1
+                elif 'Q' in karte and d >= 3:
+                    ukupno_sans += 1
+
+        # --- ODLUKE ---
+
+        # 1. SANS
+        if adut == "Sans":
+            if sam_prvi or partner_dosao:
+                return ukupno_sans >= 3
             if partner_odustao:
-                if adut not in ["Betl", "Sans"]:
-                    duzina_aduta = len(karte_po_bojama.get(adut, []))
-                    sigurni_stihovi_sa_strane = sum(1 for b, v in karte_po_bojama.items() if b != adut and 'A' in v)
-                    ima_adut_asa = 'A' in aduti_u_ruci
-                    
-                    # STRATEGIJA 1: DOĐEM (Igram sam protiv nosioca, ne treba mi partner)
-                    # Sam ide samo ako ima 4+ aduta, ili ako je apsolutni monstrum (4+ štiha uz 3 aduta)
-                    if duzina_aduta >= 4 or (stihovi >= 4 and duzina_aduta >= 3) or (stihovi >= 5 and duzina_aduta >= 2):
-                        return True 
-                        
-                    # STRATEGIJA 2: ZOVEM (Na silu vraćam partnera u igru)
-                    # TVOJA LOGIKA: Imam ~3 stabilna štiha (Kec, Kec, dugi Kralj) ali mi treba pomoć
-                    
-                    # Sa 3 aduta: MORA da ima Adutskog Keca ILI bar 1 Kec sa strane
-                    # (Samo stihovi od trece dame nisu dovoljni da opravdaju zvanje!)
-                    elif duzina_aduta == 4 and (ima_adut_asa or sigurni_stihovi_sa_strane >= 1):
-                        return "zovem"
+                if ukupno_sans >= 4: return "zovem"
+                if ukupno_sans == 3: return True
+                return False
 
-                    # Sa 2 aduta: MORA Adutski Kec + 1 Kec sa strane, ILI 2 Keca sa strane
-                    # Adutski Kec ALONE nije dovoljan — treba i podrska sa strane!
-                    elif duzina_aduta == 3 and (sigurni_stihovi_sa_strane >= 2 or (ima_adut_asa and sigurni_stihovi_sa_strane >= 1)):
-                        return "zovem"
+        # 2. PRVI NA POTEZU (Gleda samo svoja 3 sigurna štiha i tjt)
+        if sam_prvi:
+            return ukupno_stihova >= 3
 
-                    # Sa 1 adutom: samo uz 2 Keca sa strane i ukupno 3 štiha
-                    elif duzina_aduta == 2 and sigurni_stihovi_sa_strane >= 3 and stihovi >= 3:
-                        return "zovem"
+        # 3. DRUGI NA POTEZU, PARTNER DOSAO (Zategnuta pravila da se ne sudarate)
+        if partner_dosao:
+            if ima_jak_adut and sa_strane_jaki_stihovi >= 2:
+                return True
+            return False
 
-                    # STRATEGIJA 3: DALJE (Imam neku osnovnu snagu, ali nedovoljno da preživim, bežim i ja)
-                    else:
-                        return False 
-                else:
-                    # ZOVEM na Sans/Betl (Ekstremno zategnuto)
-                    sigurni_asovi = sum(1 for b, v in karte_po_bojama.items() if 'A' in v)
-                    if sigurni_asovi >= 3 or stihovi >= 5:
-                        return "zovem"
-                    return False
-                    
-            # Ako partner nije odustao (igra i on), i ja imam osnovnu snagu -> Pratim normalno
-            return True 
-            
+        # 4. DRUGI NA POTEZU, PARTNER ODUSTAO
+        if partner_odustao:
+            if ukupno_stihova >= 4:
+                return "zovem"
+            if ukupno_stihova == 3:
+                return True
+            return False
+
         return False
 
     def odluci_kontru(self, state):
@@ -325,11 +351,9 @@ class NapredniBot(BaseAgent):
         return any(pid == igrac_id for pid, k in na_stolu)
 
     def odigraj_kartu(self, state, validne_karte):
-
         if len(state.odnete_karte[0]) + len(state.odnete_karte[1]) + len(state.odnete_karte[2]) == 0:
             self.nema_karte = {0: set(), 1: set(), 2: set()}
 
-        # Ažuriraj znanje na osnovu karata koje su trenutno na stolu ili u istoriji
         self._azuriraj_znanje_o_protivnicima(state)
 
         if len(validne_karte) == 1:
@@ -337,6 +361,62 @@ class NapredniBot(BaseAgent):
 
         na_stolu = state.karte_na_stolu
         nosilac_igre = state.pobednik_licitacije
+
+        # --- EKSKLUZIVNA LOGIKA ZA BETL ---
+        if state.adut == "Betl":
+            # 1. JA SAM NOSILAC (Cilj: Izgubiti svaki štih)
+            if self.id == nosilac_igre:
+                if not na_stolu:
+                    # Prvi otvaram štih: Najbezbednije je baciti apsolutno najmanju kartu
+                    return min(validne_karte, key=self._snaga_karte)
+                else:
+                    b_prve = na_stolu[0][1].split()[1]
+                    imam_trazenu_boju = any(k.split()[1] == b_prve for k in validne_karte)
+                    
+                    if imam_trazenu_boju:
+                        # PODVLAČENJE: Tražim najveću kartu koja na stolu NE NOSI štih
+                        trenutno_najveca = max([k for pid, k in na_stolu if k.split()[1] == b_prve], key=self._snaga_karte)
+                        manje_karte = [k for k in validne_karte if self._snaga_karte(k) < self._snaga_karte(trenutno_najveca)]
+                        
+                        if manje_karte:
+                            # Genijalno: bacam najveću bezbednu kartu (čuvam manje za kasnije)
+                            return max(manje_karte, key=self._snaga_karte)
+                        else:
+                            # Osuđen sam na pad, moram da uzmem. Bacam najmanju da bar sačuvam jake.
+                            return min(validne_karte, key=self._snaga_karte)
+                    else:
+                        # ČIŠĆENJE: Nemam boju! Spasen sam, pa škartiram najopasnijeg keca ili kralja!
+                        return max(validne_karte, key=self._snaga_karte)
+
+            # 2. JA SAM PRATILAC (Cilj: Naterati nosioca da uzme štih)
+            else:
+                if not na_stolu:
+                    # Prvi otvaram štih: napadam sa najmanjom kartom da nateram nosioca da odnese
+                    return min(validne_karte, key=self._snaga_karte)
+                else:
+                    b_prve = na_stolu[0][1].split()[1]
+                    nosilac_igrao = self._da_li_je_igrao(nosilac_igre, na_stolu)
+                    
+                    if nosilac_igrao:
+                        # Nosilac je već bacio kartu. Da li je on trenutni pobednik štiha?
+                        trenutni_pobednik = GameRules.ko_nosi_odnetak(na_stolu, state.adut)
+                        
+                        if trenutni_pobednik == nosilac_igre:
+                            # GUŠENJE: Nosilac trenutno pada! Moram da bacim nešto MANJE od njegove karte da bi ostao pobednik!
+                            karta_nosioca = next(k for pid, k in na_stolu if pid == nosilac_igre)
+                            manje_od_nosioca = [k for k in validne_karte if k.split()[1] == b_prve and self._snaga_karte(k) < self._snaga_karte(karta_nosioca)]
+                            
+                            if manje_od_nosioca:
+                                return max(manje_od_nosioca, key=self._snaga_karte) # Uvaljujem mu štih
+                        
+                        # Ako nosilac ne uzima (podvukao se), ili nemam manju kartu od njega,
+                        # preuzimam štih najjačom kartom da bih ja ponovo napadao u sledećem potezu.
+                        return max(validne_karte, key=self._snaga_karte)
+                    else:
+                        # Nosilac je POSLEDNJI na potezu. Moj partner je otvorio štih.
+                        # Igram najjaču kartu da partner i ja držimo "plafon" jako visoko, 
+                        # nadajući se da će nosilac imati samo veću od nas!
+                        return max(validne_karte, key=self._snaga_karte)
         _, _, _, karte_po_bojama = self._analiziraj_ruku(state.ruke[self.id])
         
         pratioci_u_igri = [p for p in range(3) if p != nosilac_igre and state.igraci_koji_dolaze.get(p) is True]

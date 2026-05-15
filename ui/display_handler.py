@@ -927,7 +927,7 @@ class DisplayHandler:
             txt_v = FONT_MSG.render(v, True, CRNA)
             txt_s = FONT_MSG.render(znak_mapa.get(b, b), True, boja_znaka.get(b, CRNA))
             
-            box_w = 44 
+            box_w = 44
             box_h = 38
             box_rect = pygame.Rect(dx, dy - 8, box_w, box_h)
             
@@ -940,26 +940,99 @@ class DisplayHandler:
             
             screen.blit(txt_v, (pocetni_x, tekst_y))
             screen.blit(txt_s, (pocetni_x + txt_v.get_width() + 2, tekst_y))
-            return box_w + 6  
+            return box_w + 6
 
         red_boja = {'Pik': 0, 'Karo': 1, 'Tref': 2, 'Herc': 3}
         red_vrednosti = {'A': 0, 'K': 1, 'Q': 2, 'J': 3, '10': 4, '9': 5, '8': 6, '7': 7}
         def sortiraj_niz(niz):
             return sorted(niz, key=lambda karta: (red_boja[karta.split()[1]], red_vrednosti[karta.split()[0]]))
 
+        def nacrtaj_status_za_igraca(pid, x, y):
+            pobednik_id = runda.get("nosilac")
+            adut = runda.get("adut", "")
+            kontra = runda.get("kontra", False)
+            refa = runda.get("refa", False)
+            zvanje_tip = runda.get("zvanje_tip")
+            zvanje_igrac = runda.get("zvanje_igrac")
+
+            if refa:
+                labela = "Refa"
+                boja_pozadine = (150, 0, 200)
+                boja_teksta = BELA
+            elif pid == pobednik_id:
+                labela = f"{adut}"
+                boja_pozadine = (255, 215, 0)
+                boja_teksta = CRNA
+            elif pid == zvanje_igrac and zvanje_tip == "kontra":
+                labela = "Kontra"
+                boja_pozadine = (40, 100, 220)
+                boja_teksta = BELA
+            elif pid == zvanje_igrac and zvanje_tip == "zovem":
+                labela = "Zovem"
+                boja_pozadine = (40, 100, 220)
+                boja_teksta = BELA
+            elif zvanje_tip in ("kontra", "zovem") and pid != pobednik_id and pid != zvanje_igrac:
+                labela = f"Pozvan ({zvanje_tip})"
+                boja_pozadine = (40, 100, 220)
+                boja_teksta = BELA
+            elif kontra and pid != pobednik_id:
+                labela = "Kontra"
+                boja_pozadine = (40, 100, 220)
+                boja_teksta = BELA
+            else:
+                labela = "Ne prati"
+                boja_pozadine = (180, 40, 40)
+                boja_teksta = BELA
+
+            txt_surf = FONT_BOLD.render(labela, True, boja_teksta)
+            rect_w = txt_surf.get_width() + 16
+            rect_h = 24
+            label_rect = pygame.Rect(x, y, rect_w, rect_h)
+            pygame.draw.rect(screen, boja_pozadine, label_rect, border_radius=4)
+            pygame.draw.rect(screen, CRNA, label_rect, 1, border_radius=4)
+            screen.blit(txt_surf, (label_rect.x + 8, label_rect.y + (rect_h - txt_surf.get_height()) // 2))
+
+
         for pid, ime in redosled:
             ime_txt = FONT_SMALL.render(f"{ime}: ", True, (100, 100, 100))
+
+            pobednik_id = runda.get("nosilac")
+            adut = runda.get("adut", "")
+            kontra = runda.get("kontra", False)
+            refa = runda.get("refa", False)
+            zvanje_tip = runda.get("zvanje_tip")
+            zvanje_igrac = runda.get("zvanje_igrac")
+
+            if refa:
+                labela_test = "Refa"
+            elif pid == pobednik_id:
+                labela_test = f"{adut}"
+            elif pid == zvanje_igrac and zvanje_tip == "kontra":
+                labela_test = "Kontra"
+            elif pid == zvanje_igrac and zvanje_tip == "zovem":
+                labela_test = "Zovem"
+            elif zvanje_tip in ("kontra", "zovem") and pid != pobednik_id and pid != zvanje_igrac:
+                labela_test = f"Pozvan"
+            elif kontra and pid != pobednik_id:
+                labela_test = "Kontra"
+            else:
+                labela_test = "Ne prati"
+
+            status_sirina = FONT_BOLD.size(labela_test)[0] + 16
+            status_x = x - status_sirina - 10
+            nacrtaj_status_za_igraca(pid, status_x, y + 4)
             screen.blit(ime_txt, (x, y + 4))
             kart_x = x + 40
             for karta in sortiraj_niz(ruke[pid]):
                 kart_x += nacrtaj_mini(karta, kart_x, y)
-            y += 42  
+            y += 42
 
         ime_txt = FONT_SMALL.render("Talon: ", True, (100, 100, 100))
-        screen.blit(ime_txt, (x , y + 4)) 
+        screen.blit(ime_txt, (x, y + 4))
         kart_x = x + 40
         for karta in sortiraj_niz(talon):
             kart_x += nacrtaj_mini(karta, kart_x, y)
+    
 
     def nacrtaj_overlay_rezultat_runde(self, screen, runda, x, y):
         rh = self.gui.round_history

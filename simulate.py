@@ -160,4 +160,4 @@ def _ispisi_rezultate(stats, odigrane_runde):
     print("="*105)
 
 if __name__ == "__main__":
-    pokreni_simulaciju(1500)
+    pokreni_simulaciju(1000)
