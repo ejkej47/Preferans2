@@ -1,0 +1,290 @@
+1. UVOD
+
+Preferans je igra slicna bridzu. U preferansu, strategija i taktika imaju cesto mnogo veci efekat na finalni rezultat nego kvalitet karata. Pravila preferansa se brzo uce. Medjutim, postati majstor u preferansu zahteva mnogo igranja i iskustva.
+
+Preferans se igra u troje sa 32 karte (7,8,9,10,J,Q,K,A). A je najjaci, 7 najslabija.
+Svako dobija po 10 karata.
+Pre igre odrzava se licitacija da bi se odlucilo ko dobija dve preostale karte u talonu.
+Dobitnik licitacije uzima dve karte iz talona, izbacuje dve, po cemu odlucuje igru.
+Ima 6 igara - 4 adutske (pik, karo, herc, i tref), i dve bez aduta (betl, i sans).
+Sans se igra bez aduta.
+U betlu, dobitnik licitacije ne sme da uzme ni jedan stih da bi bio nagradjen sa poenima.
+Po prijavljivanju igre, druga dva igraca odlucuju da li prate ili ne. Izuzetak je betl, gde uvek igraju uvek svi.
+U svim igrama igrac mora odgovoriti na boju (znak) karte. Primer: na herc se odgovara hercom.
+U slucaju da nema boju, u adutskim igrama igrac mora igrati aduta, u koliko ga ima. Ako nema aduta igra bilo koju kartu.
+U slucaju betla i sansa,ako igrac nema trazenu boju, bilo koja karta moze da se igra.
+Igraci padaju (dobijaju lose poene) ili prolaze (dobijaju dobre poene) na igrama u kojima ucestvuju.
+Za igraca koji je pao se koriste termini kao sto su srusen, oboren, ili jednostavno nije prosao.
+Ovo su osnovna pravila. Detalje cemo ostaviti za kasnije. U koliko se ne slazete sa ovim pravilima, javite mi. A sada pocnimo detaljno od pocetka.
+
+2. BROJ IGRACA
+
+Prefeans se igra u troje.
+Cetvoro igraca mogu da igraju, ali s time da jedan od njih naizmenicno preskace krug.
+3. KARTE
+
+Igra se sa 32 karte: 7,8,9,10,J,Q,K,A.
+As je najjaci.
+4. ODREDJIVANJE REDOSLEDA IGRACA
+
+Pred pocetak partije, igraci izvlace karte.
+Najmanja karta deli, a redosled igraca je u suprotnom pravcu kazaljke na satu - od najmanje do najvise karte.
+Primer 1: Milenko izvlaci 7, Nikola 9, Igor A, a Dule J. Milenko mesa. S njegove desne strane sedi Nikola. Sa Nikoline desne je Dule, pa Igor.
+
+U igri od cetvoro, onaj koji deli ne igra prvi krug.
+Primer 2: Milenko izvlaci 9, Dusko 8, i Nikola 8. Dusko i Nikola izvlace jos po jednu dok im se karte ne razlikuju, a onda se odredjuje redosled kao u prvom primeru.
+
+5. MESANJE
+
+Vrlo je vazno promesati karte, zbog toga sto se deli po 5 karata svakom, a karte su najverovatnije povezane po boji iz predhodne partije.
+Igrac sa leve strane sece karte. Secenje karta je opcijalno, ali preporucljivo.
+6. DELENJE
+
+Pocevsi sa igracem sa desne strane: 5, 5, 5, dve u sredinu u talon, pa ponovo 5, 5, 5.
+Znaci svako dobija po 10 karata, dok dve karte idu u talon.
+Karte u talonu se zovu kup.
+7. LICITIRANJE
+
+Licitiranje je borba za karte u kupu (sa izuzetcima) i odlucivanje koja ce se od 6 igara igrati.
+Pik je najslabija igra, dok je sans najjaca.
+Svaka igra ima svoju vrednost: pik-2, karo-3, herc-4, tref-5, betl-6, sans-7.
+Igrac ima pravo da ne ucestvuje u licitiranju ili da odustane kada vidi da je pre-licitiran od strane protivnika. U tom slucaju se kaze "dalje".
+Dobitnik licitacije pokazuje kup i uzima ga. Sada drzi 12 karata u ruci. Vraca dve karte nazad na sto, koje ne pokazuje protivnicima, i nagovestava igru, znaci od pika do sansa.
+Primer 1: Milenko: "2". "Dule: "Dalje". Igor: "Dalje". Milenko uzima karte u talonu, vraca dve nazad, i kaze: "Igra se tref".
+
+Dobidnik licitacije moze da igra igru na kojoj je stao ili bilo koju visu. Znaci u primeru 1, Milenko je mogao da igra bilo koju igru.
+Primer 2: Milenko: "Dalje". Dule: "2". Igor "3". Dule: "Dalje". Igor uzima kup, i moze da igra karo (3) ili bilo koju jacu igru.
+
+Pri licitiranju, zavisno od redosleda, igraci moraju da kazu "mogu", sto znaci "mogu tu igru".
+Primer 3: Milenko: "2". "Dule: "3". Igor: "Dalje". Milenko (posto je prvi): "Mogu 3". Igor mora da kaze "4" da bi nastavio licitaciju.
+
+Primer 4: Milenko: "2". "Dule: "3". Igor: "4". Milenko (posto je prvi): "Mogu 4". Dule:"5". Igor: "Dalje". Milenko: "Mogu 5". Dule: "6". Milenko: "Mogu 6". Dule: "Dalje". Milenko dobija kup i moze da igra betl ili sans.
+
+Kada prvi igrac odustane od licitacije, onda "mogu" prelazi na drugog igraca.
+Primer 5: Milenko: "2". "Dule: "3". Igor "4". Milenko: "Dalje". Dule: "Mogu 4". Igor: "5". Dule: "Mogu 5". Igor: "6". Dule: "Mogu 6". Igor: "Dalje". Dule dobija kup i moze da igra betl ili sans.
+
+Kada svi kazu dalje, krug se ne igra, i karte se ponovo mesaju, a upisuje se refe.
+Primer 6: Milenko: "Dalje". "Dule: "Dalje". Igor: "Dalje". Krug se ne igra, i upisuje se refe.
+
+Igrac koji ne izbaci dve karte pre nego sto igra nastavi pada automacki.
+Postoji specijalni slucaj licitiranja - Igra. Sledece poglavlje sadzi detalje.
+8. IGRA
+
+Za vreme licitacije, igrac moze da prijavi igru, sto obicno znaci da ima dovoljno dobre karte da prodje bez pomoci talona.
+Igra se prijavljuje odmah
+Primer 1: Milenko: "Dalje". Dule: "2". Igor "Igra". Igor ne uzima karte iz talona i prijavljuje da li se igra 2, 3, 4, 5, ali ne sans i betl.
+
+Igra betl i igra sans se odmah prijavljuje.
+Primer 2: Milenko: "Dalje". Dule: "Igra Betl" ili "Betl". Igor: "dalje". Dule igra Betl.
+
+Primer 3: Milenko: "Dalje". Dule: "Igra Betl" ili "Betl". Igor: "Igra Sans" ili "Sans". Igor igra sans.
+
+Vise od jednog igraca moze da prijavi igru, s time da igrac koji planira da prijavi igru 2 ne sme da prijavi igru ako je vec neko prijavio igru.
+Primer 4: Milenko: "Igra". Dule moze da kaze: "Igra" ako mu je igra 3, 4, ili 5, ili "Betl", ili "Sans".
+
+Posle prijavljivanja da se igra, igraci se pitaju koja im je igra (primer 1) ali samo ako jaca igra nije vec prijavljena.
+Primer 5: Milenko: "Igra". Dule: "Igra". Igor: "Igra". Milenko: "Moja je 2", Dule: "Moja je 5", "Igor: "Moja je slabija". Znaci Igor ne prijavljuje svoju igru jer je igra 5 vec prijavljena.
+
+Sta raditi kada oba igraca idu na istu igru? Za ovaj retki slucaj nisam siguran. Oba igraca prijavljuju igru (recimo Herc). Poput licitacije, cini mi se da je igrac koji je prijavio prvi dobio igru, mada Slavko Dubackic is Novog Sada predlaze da po "nasim nepisanim pravilima igra prvi ili moze da je prepusti drugom ali da mu da kontru." 
+
+Igra se vrednuje jedan poen vise od standardnog bodovamja. Igra-2 se broji kao standarno odigrana partija gde je adut karo (3), Igra-3 se broji kao da je odigran standarni herc (4), i tako dalje.
+9. PRACENJE
+
+Dobitnik licitacije odlucuje sta ce se igrati.
+U betlu svi automatski prate, dok u se u drugim igrama igraci izjasnjavaju da li prate.
+Igrac sa desne strane se izjasnjava da li prati ili ne sa "Dodjem" ili "Ne dodjem".
+Treci igrac se izjasnjava: "Dodjem" ili "Ne dodjem"
+Primer 1: Milenko: "Igram Tref". Dusko: "Ne dodjem". Nikola: "Dodjem". Igraju Milenko i Nikola.
+
+Primer 2: Milenko: "Igram Tref". Dusko: "Dodjem". Nikola: "Dodjem". Igraju svitroje.
+
+Primer 3: Milenko: "Igram Tref". Dusko: "Ne dodjem". Nikola: "Ne Dodjem". Ne igra se. Milenko upisuje 10 odnetih stihova.
+
+Igrac koji prati moze da zove igraca koji ne prati. Igrac koji zove treceg je poenski kaznjen ako dozvoli Milenku da odnese vise od 6 stihova i nagradjen svim odnesenim stihovima koje Milenko nije dobio. Odneseni poeni se zovu supe, o kojima se detaljno govori u poglavlju 13.
+Primer 4: Milenko: "Igram Tref". Dusko: "Dodjem". Nikola: "Ne Dodjem". Dusko "Idemo zajedno". Igraju sva tri igraca.
+
+Primer 5: Milenko: "Igram Herc". Dusko: "Ne Dodjem". Nikola: "Dodjem. Idemo Zajedno". Igraju sva tri igraca.
+
+Kod takozavinh kontri (sledece poglavlje), svi igraju.
+10. KONTRA
+
+Ako je pratilac ubedjen da ce srusiti dobitnika licitacije, moze da da kontru.
+Kontra zahteva od pratioca da, zajedno sa drugim pratiocem, uhvati 5 stihova.
+U slucaju kontre svi poeni (negativni ili pozitivni) se mnoze sa 2.
+Pratilac koji je dao kontru snosi svu odgovornost i upisuje sve negativne ili pozitivne poene zaradjene protiv nosioca igre. 
+Drugi pratilac koji je pozvan na kontru pomaze igracu koji je dao kontru da obori nosioca igre, ali pri tome ne ipisuje nikakve bodove.
+Kontre se daju posle izjasnjavanja pracenja
+Primer 1: Milenko: "Igram Tref". Dusko: "Dodjem". Nikola: "Dodjem". Dusko "Kontra".
+
+S obzirom da je kontra opcija u svakoj partiji, igrac koji je na redu sa opcijom da da kontru mora dati do znanja da li ima kontru ili ne. Ako nema kontru kaze "Moze".
+Primer 2: Milenko: "Igram Tref". Dusko:"Dodjem". Nikola: "Dodjem". Dusko "Moze". Znaci nema kontru. Nikola: "Kontra."
+
+Primer 3: Milenko: "Igram Tref". Dusko: "Dodjem". Nikola: "Dodjem". Dusko: "Moze". Znaci nema kontru. Nikola: "Moze." Znaci igra se bez kontre.
+
+Igrac koji ne prati automacki polazi ako je data kontra.
+Primer 4: Milenko: "Igram Tref". Dusko: "Dodjem". Nikola: "Dodjem". Nikola: "Kontra." Igraju svih troje.
+
+Primer 5: Milenko: "Igram Tref". Dusko: "Ne dodjem". Nikola: "Dodjem i kontra". Igraju svih troje.
+
+Ako je noslilac igre ubedjen da nece pasti, moze da da rekontru na primljenu kontru.
+Kod rekontre svi poeni se ponovo mnoze sa 2.
+Primer 6: Milenko: "Igram Tref". Dusko:"Dodjem". Nikola: "Dodjem". Dusko "Moze". "Kontra." Milenko: "Rekontra"
+
+Posle primljene rekontre, pratilac ima prava da da subkontru, a nosilac da uzvrati sa mortkontrom.
+Subkontra i mortkontra udvostrucavaju poene.
+Primer 7: Milenko: "Igram Tref". Dusko:"Dodjem". Nikola: "Dodjem". Dusko "Moze". "Kontra." Milenko"Rekontra". Nikola: "Subkontra". Poeni se broje 8 puta nego normalno.
+
+Primer 8: Milenko: "Igram Tref". Dusko:"Dodjem". Nikola: "Dodjem". Dusko "Moze". "Kontra." Milenko"Rekontra". Nikola: "Subkontra". Milenko: "Mortkontra". Poeni se broje 16 puta nego normalno.
+
+Kontra je obavezna kada dobitnik licitacije igra pik. Na igru-pik nije potrebna kontra.
+Primer 9: Milenko: "Igram Pik". Dusko:"Dodjem". Nikola: "Dodjem.". Dusko "Moze". Nikola "Moze". Znaci kontre nema i pik se ne igra..
+
+Ako se na pik ne da kontra, pise se refe ili nosilac igre prolazi ako se refei vise ne upisuju.
+11. REFE
+
+Sa odredjenim ogranicenjima, refe se upisuje kada svi kazu dalje ili kontra nije data na pik
+Ako je upisan maksimalan broj refea ili je jedan od igraca ispod kape ili u minusu, refe se ne pise. Ovi termini su definisani u sledecem poglavlju.
+Ako nosilac igre ima neodigrana refe-e, svi poeni se dupliraju. Upisivanje rezultata se diskutuje u sledecem poglavlju.
+Primer 1: Igor igra tref. On ima jos dva neodigrana refea. Znaci ova partija vredi duplo.
+
+Posle odigrane partije pod refeom, nosilac partije odpisuje svoj refe kao odigran.
+Primer 2: Posle odigranog trefa, Igor otpisuje refe i sada mu ostaje jos samo jedan.
+
+12. IGRANJE PARTIJE
+
+Igrac koji je prvi licitirao igra prvi. Ako ne igra, onda je igrac sa njegove desne strane prvi.
+U sansu se uvek igra kroz vodioca igre. Znaci pratilac sa leve strane nosioca uvek ide prvi.
+Prvi igrac stavlja kartu na sto. Drugi po redu odgovara na boju. Treci igrac (ako igra) odgovara na boju. Igrac sa najvecom kartom nosi stih.
+Primer 1: Milenko igra Herc-A. Dusko stavlja Herc-7. Nikola igra Herc-9. Milenko nosi stih.
+
+Kod adutskih igara, igrac koji ne moze da odgovori na boju mora igrati aduta. Adut je uvek jaci.
+Primer 2: Adut je pik. Milenko igra Herc-A. Dusko stavlja Herc-7. Nikola nema herca i igra Pik-7. Nikola nosi stih.
+
+Kod adutskih igara, igrac koji ne moze da odgovori na boju mora i nema vise aduta moze igrati bilo koju kartu.
+U sansu i betlu, igrac koji ne moze da odgovori na boju moze igrati bilo koju kartu.
+Stihovi 2 - 10 se igraju isto kao i prvi.
+Na kraju partije broje se stihovi da se vidi ko je prosao a ko pao.
+Kod adutskih igara i sansa, nosilac mora uhvatiti bar 6 stihova da bi prosao.
+Kod betla se zahteva od nosioca igre da ne uhvati ni jedan stih. Pratioci ne padaju, izuzev ako jedan od njih nije dao kontru.
+Pratilac mora da uhvati dva stiha da bi prosao, ili 4 zajedno sa drugim pratiocem.
+Igrac koje je zvao prolazi ako je zajedno sa pozvanim igracem uhvatio ukupno bar 4 stiha.
+Igrac koji je dao kontru ili subkontru mora da uhvati sa zajedno sa trecim igracem bar 5 stihova da bi prosao.
+13. UPISIVANJE REZULTATA
+
+Igraci dobijaju pocetni broj poena na pocetku partije, ili bula.
+Broj pocetnih bula je po dogovoru. Partija od 100 u troje obicno traje 2 sata.
+Kao nosilac igre, cilj je prolaz, sto umanjuje broj bula.
+Kao pratilac igre, cilj je prolaz, sto povecava broj takozvanih supa upisanih protiv nosioca igre.
+Finalni rezultat je zbir supa i bula.
+Primer 1: Evo kako da vodite evidenciju. Upisite tri kolone. Vase ime i pocetni broj bula (100 u ovome primeru) ide u srednju kolonu. Leva i desna kolona su za upisivanje supa protiv levog i desnog igraca. Ako igrate u cetvoro, dodajte jos jednu kolonu za upisivanje supa protiv cetvrtog igraca. Supe is bule se automatski sabiraju posle svake partije. "-----" je simbol za refe. "--/--" je simbol za odigrani refe.
+
+Igrac sa leve strane
+
+(Vase Ime)
+
+100
+
+Igrac sa desne strane
+
+32
+
+90
+
+40
+
+52
+
+--/--
+
+80
+
+62
+
+-----
+
+96
+
+ 	
+70
+
+ 
+ 	 	 
+Kada je zbir bula svih igraca 0, partija je zavrsena.
+Primer 2: Milenko ima trenutno 10 bula, Dusko 8 bula, a Nikola -18 bula, Zbir je 0, znaci partija je gotova.
+
+Primer 3: Milenko ima trenutno 20 bula, Dusko 10 bula, a Nikola -10 bula, Zbir je visi od 0, znaci jos se igra.
+
+Bule se racunaju na bazi odigrane igre: prolaz = -Igra*2 a pad=+Igra*2.
+Pik=2, Karo=3, Herc=4, Tref=5, Betl=6, Sans=7
+Igra-Pik=3, Igra-Karo=4, Igra-Herc=5, Igra-Tref=6, Igra-Betl=7, Igra-Sans=8
+Kod kontre, rekontre, subkontre, i mortkontre bule se dupliraju. Znaci mnozenje je sa 2,4, 8, ili 16.
+Primer: 4: Milenko je prosao na trefu. Dusko je pao, a Nikola prosao. Milenko se spusta 10 u bulama, a Dusko dize za 10 a Nikoline bule se ne menjaju.
+
+Primer: 5: Milenko je prosao na Igra-Karo. Dusko je prosao, a Nikola pao. Milenko se spusta 8 bula, Dusko ostaje na istom, a Nikoline se dize 8 bula.
+
+Primer: 6: Milenko je prosao na Betl. Igor je dao kontru i pao. Milenko se spusta 24 bula, Igor se dize 24 bula, a Dusko ostaje na istom.
+
+Tradicionalni igraci preferansa koriste termin sesir ili kapa da oznace da su presli sa pozitivnih bula u negativne.
+Primer: 7: Milenko je prosao na Betl i ispod svog trenutnog rezultata od 8 crta sesir, as ispod sesira pise 4. Znaci trenutni rezultat je 4 ispod sesira ili ispod kape.
+
+Primer: 8: Alternativno primeru 5, Dusko (koji inace jako lose crta) prolazi na Betl i ispod svog trenutnog rezultata od 8 pise -4.
+
+Kada je bar jedan od igraca ima negativne bule (znaci ispod kape ili ispod sesira), refe se ne upisuje.
+Izuzev betla, supe se racunaju na bazi odnesenih stihova. Supa = Broj_Stihova*Igra*2
+Pik=2, Karo=3, Herc=4, Tref=5, Betl=6, Sans=7
+Igra-Pik=3, Igra-Karo=4, Igra-Herc=5, Igra-Tref=6, Igra-Betl=7, Igra-Sans=8
+Kod kontre, rekontre, subkontre, i mortkontre supe se dupliraju. Znaci mnozenje je sa 2,4, 8, ili 16.
+Primer: 9: Milenko je uhavtio 6 stihova na trefu. Dusko i Nikola su pratili i uhvatili po dva stiha. Dusko pise 2*5*2 supa protiv Milenka. Nikola isto pise 20 supa protiv Milenka.
+
+Primer 10: Milenko je uhavtio 6 stihova na trefu. Dusko je uhvatio 3 stiha a Nikola 1. Dusko pise 30 supa a Nikola 10 protiv Milenka.
+
+Primer 11: Milenko je uhvavtio 7 stihova na hercu. Dusko je zvao Nikolu i zajedno su uhvatli 3 stiha. Dusko pise sve supe 3*4*2 ali zato i pada.
+
+Primer 12: Sekula pada na kontru Igra-tref. Jasmina je dala kontru. Zanci Broj_Stihova*Igra-Tref*2*2(zbog refea) = 5*6*2*2 = 120 supa.
+
+Primer 13: Filip je pao na rekontru igra-pik na refeu. Igor je dao kontru i pise 5*3*2*4(rekontra)*2(refe) = 240 supa protiv Filipa.
+
+Pre padu na betl pratioci beleze po 60 supa, a 70 kada je igra-betl.
+Ako se partija mora prekinuti pre nego sto je zbir bula 0, onda dolazi do otpisivanja, ili podjednakog umanjivanja broja bula tako da zbir bude 0.
+Primer 14: Nikola ima 20 bula, Dusko 30, a Milenko 40. Znaci igra se jos za 90 (20+30+40) bula. Svi upisuju 30 bula, znaci Nikola na -10 bula, Dusko na 0, a Milenko na 10.
+
+Ako dolazi do otpisivanja a broj bula za koji se igra nije deljiv sa 3, onda se igraci nejednako spustaju, s time da igrac sa najlosijim bulama se uvek spusta malo vise od onog sa boljim bulama.
+Primer 15: Nikola ima 24 bula, Dusko 34, a Milenko 28. Znaci igra se jos za 86. Nikola upisuje 28 bula, Dusko za 29, a Milenko za 29.
+
+Primer 16: Nikola ima 8 bula, Dusko 2, a Milenko 0. Znaci igra se jos za 10. Nikola upisuje 4 bule, Dusko za 3, a Milenko za 3.
+
+14. FINALNI REZULTAT
+
+Finalni rezultat = -(Zbir_Vasih_Supa_Protiv_Protivnika)+(Zbir_Supa_Protiv_Vas)+Finalni_Broj_Bula*10
+Primer 1: Nikola je zavrsio sa 12 bula, 100 supa protiv Milenka i 100 protiv Duska. Dusko duzi Nikolu 80 supa, a Milenko 40 supa. Nikolin rezultat je -(100+100)+(80+40)+12*10 = 40.
+
+Rezultat ispod nule je dobar, a izad nule je los.
+Primer 2: U primeru 14, Nikola je zavrsio 40-los.
+
+Iz tradicionalnih razloga, igraci ponekad stavljaju plus znak na dobar rezultat a minus na los.
+15. SPECIJALNA PRAVILA
+
+Postoji nekoliko variacija pravila.
+Spustanje na pik kada kontra nije data je dozvoljeno kada su svi refei odigrani i (a) igrac je ispod kape ili (b) uvek
+Ako se igra zadnja partija i dodje do pada (a) Onaj koji je pao pada duplo a protivnici pisu standarnu supu (ne dupliraju) ili (b) Pad se upisuje kao i obicno.
+16. DOGOVORI
+
+Pred pocetak partije igraci se mogu dogovoriti da koriste par pravila koja vaze samo za ovu partiju. Na primer:
+Igrac koji stane na licitaciji 2,3,4 ili 5 mora imati bar 3 aduta
+Igrac koji stane na licitaciji 2,3,4 ili 5 mora imati bar 3 aduta od kojih je najjaca karta dama, kralj, ili As.
+Sans bez kontre: ako je prvi, igrac koji je pozvan na sans krece  iz trefa
+Sans sa kontom:: ako je prvi, igrac koji nije dao kontru krece iz (1) pika, ako igrac koji he dao kontru nije licitirao ili (2) iz boje do koje je igrac koji je dao kontru licitirao
+Kada neko kaze da polazi na pik, mora da ima bar dva keca, ili adutski stih i kec.
+U slucaju da jedan od igraca ne prati, pratilac ili nosilac igre se mogu pogoditi na broj stihova.
+Primer 1: Miran igra tref, Milenko prati, Dusko ne prati. Milenko: "Dajes tri?". Miran: "Da". Miran se spusta 10, a Milenko upisuje 3 stiha i partija se ne igra.
+
+Neki ozbiljni igraci kaznjavaju losu igru s time da se "ocigledne" greske kaznjavaju padom. Recimo, ako je zakljuceno da je je pratilac A pao zbog ocigledne greske pratioca B, B pada umesto A i pise njegove supe.
+Da bi greska bila ocenjena kao "ocigledna', igrac koji reklamira gresku mora biti u pozicije da dokaze da je greska napravljena onog momenta kada je karta odigrana a ne kada su sve karte vidjene.
+Primer: Igrac A daje igracu B kontru na betl. Igrac C krece iz 9 pik, B igra osam pik, A igra kec herc (znaci nema pika). Ako C ima 7 pik, C mora da igra 7 pik jer je to garantovan pad igraca B. Ako ne odigra, to je ocigledna greska.
+Igrac A zove Igraca B na sans protiv igraca C. B krece is srca, mada je dogovoreno da na poziv na sans treba krenuti iz trefa. Ako A padne, B mora da preuzme odgovornost i padne.   
+17. ODNOS PROTIVNIKA
+
+Pratioci igraju protiv nosioca partije kao partneri. Znaci pokusavaju da zajedno odnesu najvise mogucih stihova, cak kada je to na ustrb jednog od pratioca..
+Primer 1: Nikola igra tref. Krece sa Tref-Damom. Dusko stavlja Tref-Kralja. Milenko ima Tref-Asa i Tref-7. Posto je Dusko vec stavio jacu kartu od Nikoline dame, Milenko igra Tref-7 jer mu je Dusko partner. Milenko ce kasnije dobiti stih na Tref-Asa. 
+
+Igrac koji je pozvan od strane pratioca ili ucestvuje zbog date kontre igra da pomogne pratiocu. Znaci svaka odigrana karta mora pomoci pratiocu.

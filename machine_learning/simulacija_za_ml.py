@@ -29,6 +29,8 @@ def simuliraj_jednu_rundu(_):
         runda = engine.zavrsene_runde[0] 
         nosilac_id = runda["nosilac"]
         ishod_nosilac = 1 if "Prošao" in runda["rezultat"][nosilac_id] else 0 
+        skorovi = engine.scoring.izracunaj_finalni_skor()
+        neto_nosilac = skorovi[nosilac_id]
         
         # --- ULTIMATIVNA EKSTRAKCIJA PODATAKA ---
         def get_stats(ruka, adut):
@@ -121,6 +123,7 @@ def simuliraj_jednu_rundu(_):
             
             "zvanje_tip": runda["zvanje_tip"] if runda["zvanje_tip"] else "nista",
             "osvojeni_stihovi": runda["stihovi_po_igracu"].get(nosilac_id, 0),
+            "neto_nosilac": neto_nosilac,
             "ishod": ishod_nosilac
         }
     except Exception as e:
@@ -140,7 +143,7 @@ def pokreni_turbo_simulaciju(broj_rundi=10000, fajl=DEFAULT_CSV):
         "pocetna_druga_duzina", "pocetna_treca_duzina", 
         "pocetni_renonsi", "pocetni_singlovi",
         "talon_asovi", "talon_kraljevi", "talon_aduti", 
-        "zvanje_tip", "osvojeni_stihovi", "ishod"
+        "zvanje_tip", "osvojeni_stihovi","neto_nosilac", "ishod"
     ]
     
     # BRISANJE STAROG FAJLA AKO POSTOJI ZBOG NOVIH KOLONA
@@ -172,4 +175,4 @@ def pokreni_turbo_simulaciju(broj_rundi=10000, fajl=DEFAULT_CSV):
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()
-    pokreni_turbo_simulaciju(10000)
+    pokreni_turbo_simulaciju(100000)
